@@ -30,12 +30,13 @@ Data.dhr = zeros(4,1);
 Data.h0 = zeros(4,1);
 Data.dh0 = zeros(4,1);
 
-Data.lCoM=zeros(2,1);%angular momentum about the center of mass
-Data.lstance=zeros(2,1); %angular momentum about the stance foot
+Data.lCoM=0;%angular momentum about the center of mass
+Data.lstance=0; %angular momentum about the stance foot
 Data.v_sw=zeros(2,1); %swing leg velocity
 Data.p_sw=zeros(2,1); %swing leg position 
 Data.p_dsw=0; %swing leg desired position
 Data.torso_angle=0; %torso angle
 Data.CoM_height=0; %relative height of center of mass with respect to stance foot (p_com-p_st)
 Data.p_st=zeros(2,1);%stance leg position
+Data.f_ext=0;%external force
 end

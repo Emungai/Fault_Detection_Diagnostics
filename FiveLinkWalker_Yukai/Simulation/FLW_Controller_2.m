@@ -13,7 +13,7 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
     % PROTECTED METHODS =====================================================
     methods (Access = protected)
         
-        function [u, Data] = stepImpl(obj,x,t_total,GRF)
+        function [u, Data,p_stT_z] = stepImpl(obj,x,t_total,GRF,externalForce)
             Data = Construct_Data();
             q = x(1:7);
             dq = x(8:14);
@@ -202,8 +202,14 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             ddhr = [0;0;ref_ra_swT_x;ref_ra_swT_z];
             
             Me = [M -Jg';Jg,zeros(2,2)];
-            He = [C+G;dJg*dq];
+            
             Be = [B;zeros(2,4)];
+%             if t_total > 0
+%                 He = [C+G;dJg*dq];
+%             else
+                J_ext=Jp_Head(q);
+                He = [C+G-J_ext(1:3,:)'*[externalForce;zeros(2,1)];dJg*dq];
+%             end
             
             S = [eye(7),zeros(7,2)]; % S is used to seperate ddq with Fg;
             
@@ -243,14 +249,17 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             Data.dq = dq;
             Data.u = u;
             
-            Data.lCoM=LG(1:2:3);  %angular momentum about center of mass
-            Data.lstance=L_stToe(1:2:3); %angular momentum about the contact point
+            Data.lCoM=LG(2);  %angular momentum about center of mass
+            Data.lstance=L_stToe(2); %angular momentum about the contact point
             Data.v_sw=v_swT(1:2:3); %swing leg velocity
             Data.p_sw=p_swT(1:2:3); %swing leg position
            Data.p_dsw=x0_next; %swing leg desired position
             Data.torso_angle=q(3); %torso angle
             Data.CoM_height=rp_stT(3); %relative height of center of mass with respect to stance foot (p_com-p_st)
             Data.p_st=p_stT(1:2:3);%stance leg position
+            Data.f_ext=externalForce;
+            
+            p_stT_z=p_stT(3);
         end % stepImpl
 
         %% Default functions
@@ -262,42 +271,48 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             %RESETIMPL Reset System object states.
         end % resetImpl
         
-        function [name_1, name_2, name_3]  = getInputNamesImpl(~)
+        function [name_1, name_2, name_3,name_4]  = getInputNamesImpl(~)
             %GETINPUTNAMESIMPL Return input port names for System block
             name_1 = 'x';
             name_2 = 't';
             name_3 = 'GRF';
+            name_4='External Force';
         end % getInputNamesImpl
         
-        function [name_1, name_2] = getOutputNamesImpl(~)
+        function [name_1, name_2, name_3] = getOutputNamesImpl(~)
             %GETOUTPUTNAMESIMPL Return output port names for System block
             name_1 = 'u';
             name_2 = 'Data';
+            name_3='stanceHeight';
         end % getOutputNamesImpl
         
         % PROPAGATES CLASS METHODS ============================================
-        function [u, Data] = getOutputSizeImpl(~)
+        function [u, Data,p_stT_z] = getOutputSizeImpl(~)
             %GETOUTPUTSIZEIMPL Get sizes of output ports.
             u = [4, 1];
             Data = [1, 1];
+            p_stT_z=[1,1];
         end % getOutputSizeImpl
         
-        function [u, Data] = getOutputDataTypeImpl(~)
+        function [u, Data,p_stT_z] = getOutputDataTypeImpl(~)
             %GETOUTPUTDATATYPEIMPL Get data types of output ports.
             u = 'double';
             Data = 'cassieDataBus';
+            p_stT_z='double';
         end % getOutputDataTypeImpl
         
-        function [u, Data] = isOutputComplexImpl(~)
+        function [u, Data,p_stT_z] = isOutputComplexImpl(~)
             %ISOUTPUTCOMPLEXIMPL Complexity of output ports.
             u = false;
             Data = false;
+            p_stT_z=false;
         end % isOutputComplexImpl
         
-        function [u, Data] = isOutputFixedSizeImpl(~)
+        function [u, Data,p_stT_z] = isOutputFixedSizeImpl(~)
             %ISOUTPUTFIXEDSIZEIMPL Fixed-size or variable-size output ports.
             u = true;
             Data = true;
+            p_stT_z=true;
         end % isOutputFixedSizeImpl
     end % methods
 end % classdef
