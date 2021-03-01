@@ -13,14 +13,14 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
     % PROTECTED METHODS =====================================================
     methods (Access = protected)
         
-        function [u, Data,p_stT_z] = stepImpl(obj,x,t_total,GRF,externalForce)
+        function [u, Data,p_stT_z] = stepImpl(obj,x,t_total,GRF,externalForce,info)
             Data = Construct_Data();
             q = x(1:7);
             dq = x(8:14);
             % Let the output be torso angle, com height and delta x,delta z of swing
             % feet and com. delta = p_com - p_swfeet.
             T = 0.3; % walking period
-            V = 1; % Desired velocity at the end of a step
+            V = 1; % Desir ed velocity at the end of a step
             Kd = 50;
             Kp = 500;
             g=9.81; 
@@ -53,6 +53,20 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             Jp_RT = Jp_RightToe(q);
             dJp_RT = dJp_RightToe(q,dq);
             v_RT = Jp_RT*dq;
+            
+            %knee
+              p_LK = p_LeftKnee(q);
+            Jp_LK = Jp_LeftKnee(q);
+            
+            p_RK = p_RightKnee(q);
+            Jp_RK = Jp_RightKnee(q);
+            
+            %hip
+            p_LH = p_LeftHip(q);
+            Jp_LH = Jp_LeftHip(q);
+            
+            p_RH = p_RightHip(q);
+            Jp_RH = Jp_RightHip(q);
             
             % com position RELATIVE to toes
             
@@ -112,6 +126,9 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
                 
                 L_stToe = L_LeftToe;
                 L_swToe = L_RightToe;
+                
+                p_swK=p_LK;
+                Jp_swK=Jp_LK;
             else
                 p_stT = p_RT;
                 Jp_stT = Jp_RT;
@@ -134,7 +151,10 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
                 rv_swT = rv_LT;
                 
                 L_stToe = L_RightToe;
-                L_swToe = L_LeftToe;
+                L_swToe = L_RightToe;
+                
+                p_swK=p_RK;
+                Jp_swK=Jp_RK;
             end
             
 
@@ -207,8 +227,17 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
 %             if t_total > 0
 %                 He = [C+G;dJg*dq];
 %             else
+if info.torso
                 J_ext=Jp_Head(q);
-                He = [C+G-J_ext(1:3,:)'*[externalForce;zeros(2,1)];dJg*dq];
+elseif info.knee
+    J_ext=Jp_swK;
+elseif info.hip
+    J_ext=Jp_RH; %note that it doesn't matter which jacobian we use, they should be the same since the hip position doesn't move
+end
+                
+                Fe=[J_ext(1:3,:)'*[externalForce;zeros(2,1)];zeros(2,1)];
+                  He = [C+G;dJg*dq];
+%                 He = [C+G-J_ext(1:3,:)'*[externalForce;zeros(2,1)];dJg*dq];
 %             end
             
             S = [eye(7),zeros(7,2)]; % S is used to seperate ddq with Fg;
@@ -216,7 +245,8 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             y = h0 - hr;
             dy = dh0 - dhr;
             
-            u = (Jh*S*Me^-1*Be)^-1*(-Kd*dy-Kp*y+ddhr+Jh*S*Me^-1*He);
+            
+            u = (Jh*S*Me^-1*Be)^-1*(-Kd*dy-Kp*y+ddhr+Jh*S*Me^-1*(He-Fe));
 %             u = 10*ones(4,1)*sin(t);
             
             %% Data assignment
@@ -271,12 +301,13 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             %RESETIMPL Reset System object states.
         end % resetImpl
         
-        function [name_1, name_2, name_3,name_4]  = getInputNamesImpl(~)
+        function [name_1, name_2, name_3,name_4,name_5]  = getInputNamesImpl(~)
             %GETINPUTNAMESIMPL Return input port names for System block
             name_1 = 'x';
             name_2 = 't';
             name_3 = 'GRF';
             name_4='External Force';
+            name_5='info';
         end % getInputNamesImpl
         
         function [name_1, name_2, name_3] = getOutputNamesImpl(~)
@@ -284,6 +315,7 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             name_1 = 'u';
             name_2 = 'Data';
             name_3='stanceHeight';
+            
         end % getOutputNamesImpl
         
         % PROPAGATES CLASS METHODS ============================================
