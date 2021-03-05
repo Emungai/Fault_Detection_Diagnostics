@@ -1,6 +1,7 @@
 clear all; clc;
 start_up;
 PCA_info_full=[];
+PCA_info_full_shr=[];
 cur=pwd;
 Save_Solution=0;
 ramp=0;
@@ -33,12 +34,12 @@ sim('FLWSim',Simulation_Time)
 %lstance=angular momentum about the stance foot 
 %v_sw=swing leg velocity
 %p_sw=swing leg position 
-%p_dw=swing leg desired position
+%p_dw=swing leg desired position- it is the desired relative position of COM to stance foot swing foot in the beginning of next step,(at this step it is still swing foot) so that COM velocity can be V at time T
 %torso_angle=torso angle
 %CoM_height=relative height of center of mass with respect to stance foot (p_com-p_st)
-%p_st=stance leg position
+%p_st=stance leg z position
 
-Simulation_Time=1.5;
+Simulation_Time=2.5;
 externalForce=-500;
 
 info.torso=0;
@@ -49,17 +50,33 @@ info_bus = evalin('base', info_bus_info.busName);
 
 sim('FLWSim',Simulation_Time)
 
+% PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
+%     Data.p_sw.Data(1:2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
+%     Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_st.Time,...
+%     Data.f_ext.Data(1,:)']; %lCoM,lstance,v_sw,p_sw,p_dw,torso_angle,CoM_height,p_st,time,external force along x
 PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
-    Data.p_sw.Data(1:2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
-    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_st.Time,...
-    Data.f_ext.Data(1,:)']; %lCoM,lstance,v_sw,p_sw,p_dw,torso_angle,CoM_height,p_st,time,external force along x
+    Data.p_sw.Data(2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
+    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...
+    Data.p_st.Time,Data.f_ext.Data(1,:)']; 
 dataInfo.Data=Data;
 dataInfo.PCA_info=PCA_info;
 
+if ramp
+PCA_info_full=[PCA_info_full;PCA_info];
+else
+PCA_info_full=[PCA_info_full;PCA_info];
+PCA_info_str{k}=PCA_info;
+PCA_info_full_shr=[PCA_info_full_shr;PCA_info(1200:53:end,:)];
+PCA_info_str_shr{k}=PCA_info(1200:53:end,:);
+end
+dataInfo.PCA_info_full=PCA_info_full;
+dataInfo.PCA_info_str=PCA_info_str;
+dataInfo.PCA_info_full_shr=PCA_info_full_shr;
+dataInfo.PCA_info_str_shr=PCA_info_str_shr;
 if Save_Solution
 data_name = char(datetime('now','TimeZone','local','Format','d-MMM-y'));%'local/longer_double_support_wider_step_dummy';
 % name_save = [num2str(externalForce(1)), 'N_', data_name];
-name_save = ['goodModel', data_name];
+name_save = ['windowsTest_stepKneeExtForce_0N_-3000N', data_name];
 save_dir = fullfile(cur, 'data\x_multi_extForceDisturbance');
  if ~exist(save_dir,'dir'), mkdir(save_dir); end
  file_name = [name_save, '.mat'];
@@ -67,32 +84,35 @@ fprintf('Saving info %s\n', file_name);
         
 save(fullfile(save_dir, file_name), 'dataInfo');
 end
-if ramp
-PCA_info_full=[PCA_info_full;PCA_info];
-else
-PCA_info_full=[PCA_info_full;PCA_info(35:53:end,:)];
-PCA_info_str{k}=PCA_info(35:53:end,:);
-end
+
 % PCA_info_full=[PCA_info_full;[normr(PCA_info(:,1:12)),PCA_info(:,13:end)]];
-dataInfo.PCA_info_full=PCA_info_full;
-dataInfo.PCA_info_str=PCA_info_str;
+
 k=k+1;
 end
  %% try
- 
-externalForce=600;
+info.torso=0;
+info.knee=1;
+info.hip=0;
+info_bus_info = Simulink.Bus.createObject(info);
+info_bus = evalin('base', info_bus_info.busName);
+
+externalForce=-3000;
 Simulation_Time=10;
 sim('FLWSim',Simulation_Time)
 % 
 FA = FLWAnimation;
 FA.Initializaztion(X_states',tout');
 PCA_info_full=[];
+% PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
+%     Data.p_sw.Data(1:2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
+%     Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_st.Time,...
+%     Data.f_ext.Data(1,:)']; 
 PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
-    Data.p_sw.Data(1:2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
-    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_st.Time,...
-    Data.f_ext.Data(1,:)']; 
-
-PCA_info_full=[PCA_info_full;PCA_info(35:53:end,:)];
+    Data.p_sw.Data(2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
+    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...
+    Data.p_st.Time,Data.f_ext.Data(1,:)']; 
+% PCA_info_full=[PCA_info_full;PCA_info(35:53:end,:)];
+% PCA_info_full=[PCA_info_full;PCA_info];
 %% RPCA
 % PCA_info_full_norm=normr(PCA_info_full(1:12,:));
 % [L,S]=RPCA(PCA_info_full_norm);
@@ -102,7 +122,7 @@ PCA_info_full=[PCA_info_full;PCA_info(35:53:end,:)];
 % 
 % [L_F,S_F]=RPCA(PCA_info_full);
 
-X=normc(PCA_info_full(:,1:10));
+X=normc(PCA_info_full(:,1:end-2));
 [L_O,S_O]=RPCA(X);
 %[PCA_info,PCA_info]
 %%
@@ -141,36 +161,49 @@ var_PCA=var_PCA./sum(lmd);
 %% plotting on Principal Axes
 
 figure, hold on
-X=normc(PCA_info_full(35:end,1:10));
+k=1;
+beg=1;
+X=normc(PCA_info_full(beg:end,1:end-2));
+% X=PCA_info_full(beg:end,1:end-2);
+goodData=0;
+if goodData
+X=dataInfo.PCA_info_full(:,1:end-2);
+end
 obs=X;
 % V=V_svd;
 % for j=1: length(PCA_info_str)
 %     obs=PCA_info_str{j}';
-k=1;
+
 if ramp
-    prev=round(PCA_info_full(35:end,end-1));
+    prev=round(PCA_info_full(beg,end-1));
     jetcustom = jet(9);
 else
 prev=PCA_info_full(1,end);
 jetcustom = jet(7);
 end
-jetcustom = jet(10);
-for i=35:size(obs,1)
+jetcustom = jet(9);
+for i=1:size(obs,1)
     x = V(:,1)'*obs(i,:)';
     y = V(:,2)'*obs(i,:)';
     z = V(:,3)'*obs(i,:)';
-    if ramp
-        comp=round(PCA_info_full(i,end-1));
+    if goodData
+        plot3(x,y,z,'kx','LineWidth',2);
     else
-        comp=PCA_info_full(i,end);
+        if ramp
+            comp=round(PCA_info_full(i,end-1));
+        else
+            comp=PCA_info_full(i,end);
+        end
+        if  comp~= prev
+            prev=comp;
+            k=k+1;
+        end
+        
+%         plot3(x,y,z,'kx','LineWidth',2);
+        
+      plot3(x,y,z,'x','Color', jetcustom(k,:),'LineWidth',2);
     end
-    if  comp~= prev
-        prev=comp;
-        k=k+1;
-    end
-    
-        plot3(x,y,z,'x','Color', jetcustom(k,:),'LineWidth',2);
-%         plot3(x,y,z,'rx','LineWidth',2);
+    %         plot3(x,y,z,'rx','LineWidth',2);
    % plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2)
       
     
@@ -180,20 +213,23 @@ colormap(jetcustom);
 cb = colorbar; 
 if ramp
 caxis([0 8]) 
-ylabel(cb,'time') 
+ylabel(cb,'time (rounded)') 
 else
- caxis([1 7]) 
+ caxis([size(PCA_info_str)]) 
  ylabel(cb,'force') 
 end
+% caxis([0 k-1]) 
+caxis([1 k]) 
+%  caxis([0 7]) 
 view(85,25), grid on, set(gca,'FontSize',13)
 xlabel('V1')
 ylabel('V2')
 zlabel('V3')
 
-title('RPCA-PCA(L)-X')
+title('RPCA-PCA(L)-X(window all)')
 % title('PCA(X)-X')
 %%
-feat={'lcom_y','lstance_y','v_sw_x','v_sw_z','p_sw_x','p_sw_z','torso_angle','com_height','p_st_x','p_st_z'};
+feat={'lcom_y','lstance_y','v_sw_x','v_sw_z','p_sw_z','p_dsw_x','torso_angle','com_height','p_st_z','CoM_rel_p_legs'};
 
 prev=PCA_info_full(1,end);
 jetcustom = jet(7);
@@ -203,32 +239,45 @@ for i=1:10
     subplot(2,5,i)
     if ramp
         t=Data.p_com.Time;
-    plot(t,L_O(:,i)-S_O(:,i));
-    hold on
-    plot(t,zeros(size(L_O(:,i))),'k','LineWidth',2);
-    
-    else
-      
-%         fst=length(PCA_info_str{1});
-%         snd=length(PCA_info_str{2});
-%         thd=length(PCA_info_str{3});
-        fst=0;
-        for j=1:length(PCA_info_str)
-            
-            snd=length(PCA_info_str{j});
-        plot([fst+1:fst+snd],L_O(fst+1:snd+fst,i)-S_O(fst+1:snd+fst,i),'Color',jetcustom(j,:));
+        plot(t,L_O(:,i)-S_O(:,i));
         hold on
-        fst=fst+snd;
+        plot(t,zeros(size(L_O(:,i))),'k','LineWidth',2);
+        
+    else
+        
+        %         fst=length(PCA_info_str{1});
+        %         snd=length(PCA_info_str{2});
+        %         thd=length(PCA_info_str{3});
+        fst=0;
+        if window
+            t_act=5509;
+            jetcustom = jet(2);
+            plot([t(1:t_act)],L_O(1:t_act,i)-S_O(1:t_act,i),'Color',jetcustom(1,:));
+            hold on
+            plot([t(t_act+1:end)],L_O(t_act+1:end,i)-S_O(t_act+1:end,i),'Color',jetcustom(2,:));
+            hold on
+            plot([t],zeros(size(L_O(:,i))),'k','LineWidth',2);
+            
+        else
+            for j=1:length(PCA_info_str)
+                
+                snd=length(PCA_info_str{j});
+                plot([fst+1:fst+snd],L_O(fst+1:snd+fst,i)-S_O(fst+1:snd+fst,i),'Color',jetcustom(j,:));
+                hold on
+                fst=fst+snd;
+                 plot(zeros(size(L_O(:,i))),'k','LineWidth',2);
+            end
         end
-%         hold on
-%         plot([fst+1:fst+snd],L_O(fst+1:snd+fst,i)-S_O(fst+1:snd+fst,i),'Color',jetcustom(2,:));
-%         hold on
-%         plot([1+snd+fst:fst+snd+thd],L_O(fst+snd+1:end,i)-S_O(fst+snd+1:end,1),'Color',jetcustom(3,:));
-%         hold on
-        plot(zeros(size(L_O(:,i))),'k','LineWidth',2);
+        %         hold on
+        %         plot([fst+1:fst+snd],L_O(fst+1:snd+fst,i)-S_O(fst+1:snd+fst,i),'Color',jetcustom(2,:));
+        %         hold on
+        %         plot([1+snd+fst:fst+snd+thd],L_O(fst+snd+1:end,i)-S_O(fst+snd+1:end,1),'Color',jetcustom(3,:));
+        %         hold on
+       
     end
- 
+    
     title(feat{i})
 end
 sgtitle('L-S')
-legend('nominal','500 torso','-40 torso', '30 knee', '-500 knee', '200 hip','-500 hip')
+legend('nominal','-3000 knee')
+% legend('nominal','500 torso','-40 torso', '30 knee', '-500 knee', '200 hip','-500 hip')

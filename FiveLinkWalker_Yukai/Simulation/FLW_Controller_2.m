@@ -247,6 +247,7 @@ end
             
             
             u = (Jh*S*Me^-1*Be)^-1*(-Kd*dy-Kp*y+ddhr+Jh*S*Me^-1*(He-Fe));
+% u = (Jh*S*Me^-1*Be)^-1*(-Kd*dy-Kp*y+ddhr+Jh*S*Me^-1*(He));
 %             u = 10*ones(4,1)*sin(t);
             
             %% Data assignment
@@ -288,7 +289,10 @@ end
             Data.CoM_height=rp_stT(3); %relative height of center of mass with respect to stance foot (p_com-p_st)
             Data.p_st=p_stT(1:2:3);%stance leg position
             Data.f_ext=externalForce;
+            Data.p_relCoMLegs=p_com(1)-0.5*(p_LT(1)+p_RT(1));
             
+            %using this value to stop sim if the stance foot sinks more
+            %than an inch into the ground
             p_stT_z=p_stT(3);
         end % stepImpl
 
