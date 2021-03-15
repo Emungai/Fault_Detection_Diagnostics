@@ -29,7 +29,7 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
 
             if obj.stanceLeg == -1
                 GRF_sw_z = GRF(6);
-                GRF_st_z = GRF(3);
+                GRF_st_z = GRF(3); 
             else
                 GRF_sw_z = GRF(3);
                 GRF_st_z = GRF(6);
@@ -290,6 +290,24 @@ end
             Data.p_st=p_stT(1:2:3);%stance leg position
             Data.f_ext=externalForce;
             Data.p_relCoMLegs=p_com(1)-0.5*(p_LT(1)+p_RT(1));
+            Data.stepDuration=s;
+            %grabbing the updated GRF information
+            if obj.stanceLeg == -1
+                GRF_sw_z = GRF(6);
+                GRF_st_z = GRF(3);
+                
+                GRF_sw_x = GRF(4);
+                GRF_st_x = GRF(1);
+                
+            else
+                GRF_sw_z = GRF(3);
+                GRF_st_z = GRF(6);
+                
+                GRF_sw_x = GRF(1);
+                GRF_st_x = GRF(4);
+            end
+            Data.st_GRF=[GRF_st_x;GRF_st_z];
+            Data.sw_GRF=[GRF_sw_x;GRF_sw_z];
             
             %using this value to stop sim if the stance foot sinks more
             %than an inch into the ground

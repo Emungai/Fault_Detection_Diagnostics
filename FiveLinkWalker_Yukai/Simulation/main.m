@@ -58,9 +58,10 @@ PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',..
     Data.p_sw.Data(2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
     Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...
     Data.p_st.Time,Data.f_ext.Data(1,:)']; 
+CCA_info=[Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)'];
 dataInfo.Data=Data;
 dataInfo.PCA_info=PCA_info;
-
+dataInfo.CCA_info=CCA_info;
 if ramp
 PCA_info_full=[PCA_info_full;PCA_info];
 else
@@ -76,8 +77,8 @@ dataInfo.PCA_info_str_shr=PCA_info_str_shr;
 if Save_Solution
 data_name = char(datetime('now','TimeZone','local','Format','d-MMM-y'));%'local/longer_double_support_wider_step_dummy';
 % name_save = [num2str(externalForce(1)), 'N_', data_name];
-name_save = ['windowsTest_stepKneeExtForce_0N_-3000N', data_name];
-save_dir = fullfile(cur, 'data\x_multi_extForceDisturbance');
+name_save = ['CCA_windowsTest_stepKneeExtForce_0N_-3000N', data_name];
+save_dir = fullfile(cur, 'data\x_multi_extForceDisturbance_CCA');
  if ~exist(save_dir,'dir'), mkdir(save_dir); end
  file_name = [name_save, '.mat'];
 fprintf('Saving info %s\n', file_name);
@@ -109,8 +110,9 @@ PCA_info_full=[];
 %     Data.f_ext.Data(1,:)']; 
 PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
     Data.p_sw.Data(2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
-    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...
+    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
     Data.p_st.Time,Data.f_ext.Data(1,:)']; 
+CCA_info=[Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)'];
 % PCA_info_full=[PCA_info_full;PCA_info(35:53:end,:)];
 % PCA_info_full=[PCA_info_full;PCA_info];
 %% RPCA
@@ -123,8 +125,14 @@ PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',..
 % [L_F,S_F]=RPCA(PCA_info_full);
 
 X=normc(PCA_info_full(:,1:end-2));
+X=normalize(PCA_info_full(:,1:end-2));
+% X=normalize(X);
 [L_O,S_O]=RPCA(X);
 %[PCA_info,PCA_info]
+Y=normalize(CCA_info);
+[L_C,S_C]=RPCA(Y);
+
+[A,B,r,U,V,stats] = canoncorr(X,Y);
 %%
 
 [r,c]=size(X);
@@ -147,7 +155,8 @@ lmd_svd=diag(S);
 [V,Score,lmd]=pca(L_O);
 % [V,Score,lmd]=pca(X);
 var_PCA=[];
-
+% V=V_svd;
+% lmd=lmd_svd;
 for j=1:length(lmd)
     if j>1
     var_PCA(j)=lmd(j)+var_PCA(j-1);
@@ -163,13 +172,16 @@ var_PCA=var_PCA./sum(lmd);
 figure, hold on
 k=1;
 beg=1;
-X=normc(PCA_info_full(beg:end,1:end-2));
+% X=normc(PCA_info_full(beg:end,1:end-2));
+% X=normr(PCA_info_full(beg:end,1:end-2));
 % X=PCA_info_full(beg:end,1:end-2);
 goodData=0;
 if goodData
-X=dataInfo.PCA_info_full(:,1:end-2);
+    X=dataInfo.PCA_info_full(:,1:end-2);
 end
-obs=X;
+Xavg = mean(X,2);                       % Compute mean
+Xmean = X - Xavg*ones(1,size(X,2));  
+obs=Xmean;
 % V=V_svd;
 % for j=1: length(PCA_info_str)
 %     obs=PCA_info_str{j}';
@@ -186,11 +198,14 @@ for i=1:size(obs,1)
     x = V(:,1)'*obs(i,:)';
     y = V(:,2)'*obs(i,:)';
     z = V(:,3)'*obs(i,:)';
+    r= V(:,4)'*obs(i,:)';
     if goodData
         plot3(x,y,z,'kx','LineWidth',2);
     else
         if ramp
-            comp=round(PCA_info_full(i,end-1));
+            
+%             comp=round(PCA_info_full(i,end-1));
+            comp = fix(PCA_info_full(i,end-1)); %just saves the non-decimal part of the number
         else
             comp=PCA_info_full(i,end);
         end
@@ -206,7 +221,7 @@ for i=1:size(obs,1)
     %         plot3(x,y,z,'rx','LineWidth',2);
    % plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2)
       
-    
+    FullData(i,:)=[x,y,z,r];
 end
 % end
 colormap(jetcustom); 
@@ -221,13 +236,14 @@ end
 % caxis([0 k-1]) 
 caxis([1 k]) 
 %  caxis([0 7]) 
-view(85,25), grid on, set(gca,'FontSize',13)
+view(155,15), grid on, set(gca,'FontSize',13)
 xlabel('V1')
 ylabel('V2')
 zlabel('V3')
 
-title('RPCA-PCA(L)-X(window all)')
+title('RPCA-PCA(L)-X(standardized rows)')
 % title('PCA(X)-X')
+
 %%
 feat={'lcom_y','lstance_y','v_sw_x','v_sw_z','p_sw_z','p_dsw_x','torso_angle','com_height','p_st_z','CoM_rel_p_legs'};
 

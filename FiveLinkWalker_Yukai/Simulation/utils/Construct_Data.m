@@ -40,4 +40,7 @@ Data.CoM_height=0; %relative height of center of mass with respect to stance foo
 Data.p_st=zeros(2,1);%stance leg position
 Data.f_ext=0;%external force
 Data.p_relCoMLegs=0; %position of the CoM in between the legs 
+Data.stepDuration=0;
+Data.st_GRF=zeros(2,1); 
+Data.sw_GRF=zeros(2,1); 
 end

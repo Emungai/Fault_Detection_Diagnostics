@@ -1,5 +1,5 @@
 %% plotting window results
-step=[1:1000:size(PCA_info_full,1)];
+step=[1:2000:size(PCA_info_full,1)];
 if step(end) < size(PCA_info_full,1)
     step(end+1)=size(PCA_info_full,1);
 end
@@ -11,98 +11,98 @@ for j=1:length(step)-1
     force=PCA_info_full(step(j):step(j+1),end);
     [L_O,S_O]=RPCA(X);
     %% plotting on Principal Axes
-    
-    figure, hold on
-    k=1;
-    beg=step(j);
-    
-    obs=X;
-    % V=V_svd;
-    % for j=1: length(PCA_info_str)
-    %     obs=PCA_info_str{j}';
-    
-    if ramp
-        prev=round(PCA_info_full(beg,end-1));
-        jetcustom = jet((round(t(end))+1-round(t(end)))+1);
-    else
-        prev=PCA_info_full(1,end);
-        jetcustom = jet(7);
-    end
-    
-    for i=1:size(obs,1)
-        x = V(:,1)'*obs(i,:)';
-        y = V(:,2)'*obs(i,:)';
-        z = V(:,3)'*obs(i,:)';
-        if goodData
-            plot3(x,y,z,'kx','LineWidth',2);
-        else
-            if ramp
-                if i<size(obs,1)
-                comp=round(PCA_info_full(i+beg,end-1));
-                end
-            else
-                if i<size(obs,1)
-                comp=PCA_info_full(i+beg,end);
-                end
-            end
-            if  comp~= prev
-                prev=comp;
-                k=k+1;
-            end
-            
-            %         plot3(x,y,z,'kx','LineWidth',2);
-            [LIA_per,LOCB]=ismember(-3000,force);
-            [LIA]=ismember(0,force);
-            if LIA && LIA_per
-                if i< LOCB
-                    plot3(x,y,z,'x','Color', jetcustom(1,:),'LineWidth',2);
-                else
-                    plot3(x,y,z,'x','Color', jetcustom(2,:),'LineWidth',2);
-                end
-            else
-                plot3(x,y,z,'x','Color', jetcustom(k,:),'LineWidth',2);
-            end
-        end
-               plot3(x,y,z,'rx','LineWidth',2);
-        % plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2)
-        
-        
-    end
-    % end
-    colormap(jetcustom);
-    if ramp && k>1
-        
-        cb = colorbar;
-        caxis([round(t(1)) round(t(end))])
-        ylabel(cb,'time (rounded)')
-        
-        
-        
-    elseif ~ramp
-        cb = colorbar;
-        caxis([size(PCA_info_str)])
-        ylabel(cb,'force')
-    end
-    % caxis([0 k-1])
-    % caxis([1 k])
-    %  caxis([0 7])
-    view(85,25), grid on, set(gca,'FontSize',13)
-    xlabel('V1')
-    ylabel('V2')
-    zlabel('V3')
-    
-    title(['RPCA-PCA(L)-X(window', string(t(1)),'-',string(t(end)),')'])
-    % title('PCA(X)-X')
+%     
+%     figure, hold on
+%     k=1;
+%     beg=step(j);
+%     
+%     obs=X;
+%     % V=V_svd;
+%     % for j=1: length(PCA_info_str)
+%     %     obs=PCA_info_str{j}';
+%     
+%     if ramp
+%         prev=round(PCA_info_full(beg,end-1));
+%         jetcustom = jet(round(t(end))-round(t(1))+1);
+%     else
+%         prev=PCA_info_full(1,end);
+%         jetcustom = jet(7);
+%     end
+%     
+%     for i=1:size(obs,1)
+%         x = V(:,1)'*obs(i,:)';
+%         y = V(:,2)'*obs(i,:)';
+%         z = V(:,3)'*obs(i,:)';
+%         if goodData
+%             plot3(x,y,z,'kx','LineWidth',2);
+%         else
+%             if ramp
+%                 if i<size(obs,1)
+%                 comp=round(PCA_info_full(i+beg,end-1));
+%                 end
+%             else
+%                 if i<size(obs,1)
+%                 comp=PCA_info_full(i+beg,end);
+%                 end
+%             end
+%             if  comp~= prev
+%                 prev=comp;
+%                 k=k+1;
+%             end
+%             
+%             %         plot3(x,y,z,'kx','LineWidth',2);
+%             [LIA_per,LOCB]=ismember(-3000,force);
+%             [LIA]=ismember(0,force);
+%             if LIA && LIA_per
+%                 if i< LOCB
+%                     plot3(x,y,z,'x','Color', jetcustom(1,:),'LineWidth',2);
+%                 else
+%                     plot3(x,y,z,'x','Color', jetcustom(2,:),'LineWidth',2);
+%                 end
+%             else
+%                 plot3(x,y,z,'x','Color', jetcustom(k,:),'LineWidth',2);
+%             end
+%         end
+% %                plot3(x,y,z,'rx','LineWidth',2);
+%         % plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2)
+%         
+%         
+%     end
+%     % end
+%     colormap(jetcustom);
+%     if ramp && k>1
+%         
+%         cb = colorbar;
+%         caxis([round(t(1)) round(t(end))])
+%         ylabel(cb,'time (rounded)')
+%         
+%         
+%         
+%     elseif ~ramp
+%         cb = colorbar;
+%         caxis([size(PCA_info_str)])
+%         ylabel(cb,'force')
+%     end
+%     % caxis([0 k-1])
+%     % caxis([1 k])
+%     %  caxis([0 7])
+%     view(85,25), grid on, set(gca,'FontSize',13)
+%     xlabel('V1')
+%     ylabel('V2')
+%     zlabel('V3')
+%     
+%     title(['RPCA-PCA(L)-X(window', string(t(1)),'-',string(t(end)),')'])
+%     % title('PCA(X)-X')
     %%
-    feat={'lcom_y','lstance_y','v_sw_x','v_sw_z','p_sw_z','p_dsw_x','torso_angle','com_height','p_st_z','CoM_rel_p_legs'};
+    feat={'lcom_y','lstance_y','v_sw_x','v_sw_z','p_sw_z','p_dsw_x','torso_angle','com_height','p_st_z','CoM_rel_p_legs','step_duration'};
     ramp=0;
     window=1;
     prev=PCA_info_full(1,end);
     jetcustom = jet(7);
     k=1;
     figure
-    for i=1:10
-        subplot(2,5,i)
+    for i=1:length(V)
+        subplot(2,6,i)
         if ramp
             t=Data.p_com.Time;
             plot(t,L_O(:,i)-S_O(:,i));
