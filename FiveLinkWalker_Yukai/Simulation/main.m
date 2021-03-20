@@ -77,8 +77,8 @@ dataInfo.PCA_info_str_shr=PCA_info_str_shr;
 if Save_Solution
 data_name = char(datetime('now','TimeZone','local','Format','d-MMM-y'));%'local/longer_double_support_wider_step_dummy';
 % name_save = [num2str(externalForce(1)), 'N_', data_name];
-name_save = ['CCA_windowsTest_stepKneeExtForce_0N_-3000N', data_name];
-save_dir = fullfile(cur, 'data\x_multi_extForceDisturbance_CCA');
+name_save = ['EscapeTime_windowsTest_stepKneeExtForce_0N_-3000N', data_name];
+save_dir = fullfile(cur, 'data\x_multi_extForceDisturbance');
  if ~exist(save_dir,'dir'), mkdir(save_dir); end
  file_name = [name_save, '.mat'];
 fprintf('Saving info %s\n', file_name);
@@ -91,13 +91,13 @@ end
 k=k+1;
 end
  %% try
-info.torso=0;
-info.knee=1;
+info.torso=1;
+info.knee=0;
 info.hip=0;
 info_bus_info = Simulink.Bus.createObject(info);
 info_bus = evalin('base', info_bus_info.busName);
 
-externalForce=-3000;
+externalForce=1500;
 Simulation_Time=10;
 sim('FLWSim',Simulation_Time)
 % 
@@ -111,6 +111,7 @@ PCA_info_full=[];
 PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
     Data.p_sw.Data(2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
     Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
+    Data.step.Data(end)-Data.step.Data(1,:)',...
     Data.p_st.Time,Data.f_ext.Data(1,:)']; 
 CCA_info=[Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)'];
 % PCA_info_full=[PCA_info_full;PCA_info(35:53:end,:)];
@@ -125,7 +126,7 @@ CCA_info=[Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)'];
 % [L_F,S_F]=RPCA(PCA_info_full);
 
 X=normc(PCA_info_full(:,1:end-2));
-X=normalize(PCA_info_full(:,1:end-2));
+X=normalize(PCA_info_full(:,1:end-3));
 % X=normalize(X);
 [L_O,S_O]=RPCA(X);
 %[PCA_info,PCA_info]
@@ -189,11 +190,14 @@ obs=Xmean;
 if ramp
     prev=round(PCA_info_full(beg,end-1));
     jetcustom = jet(9);
+elseif escapeTime
+    prev=PCA_info_full(1,end-2);
+    jetcustom = jet(PCA_info_full(1,end-2)+1);
 else
 prev=PCA_info_full(1,end);
 jetcustom = jet(7);
 end
-jetcustom = jet(9);
+% jetcustom = jet(9);
 for i=1:size(obs,1)
     x = V(:,1)'*obs(i,:)';
     y = V(:,2)'*obs(i,:)';
@@ -206,6 +210,8 @@ for i=1:size(obs,1)
             
 %             comp=round(PCA_info_full(i,end-1));
             comp = fix(PCA_info_full(i,end-1)); %just saves the non-decimal part of the number
+        elseif escapeTime
+            comp=PCA_info_full(i,end-2);
         else
             comp=PCA_info_full(i,end);
         end
@@ -229,19 +235,22 @@ cb = colorbar;
 if ramp
 caxis([0 8]) 
 ylabel(cb,'time (rounded)') 
+elseif escapeTime
+    caxis([-PCA_info_full(1,end-2) 0])
+    ylabel(cb,'escape time') 
 else
  caxis([size(PCA_info_str)]) 
  ylabel(cb,'force') 
 end
 % caxis([0 k-1]) 
-caxis([1 k]) 
+% caxis([1 k]) 
 %  caxis([0 7]) 
 view(155,15), grid on, set(gca,'FontSize',13)
 xlabel('V1')
 ylabel('V2')
 zlabel('V3')
 
-title('RPCA-PCA(L)-X(standardized rows)')
+title('RPCA-PCA(L)-X(standardized columns)')
 % title('PCA(X)-X')
 
 %%

@@ -8,6 +8,7 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
        total_mass = 32;
        rp_swT_ini = zeros(3,1);
        rv_swT_ini = zeros(3,1);
+       step=0;
     end % properties
     
     % PROTECTED METHODS =====================================================
@@ -92,6 +93,7 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             if (GRF_sw_z >= 150 && s>0.5) || s>1.1
                 obj.stanceLeg = -obj.stanceLeg;
                 obj.t0 = t_total;
+                obj.step=obj.step+1;
                 if obj.stanceLeg == -1
                     obj.rp_swT_ini = rp_RT;
                     obj.rv_swT_ini = rv_RT;
@@ -308,6 +310,7 @@ end
             end
             Data.st_GRF=[GRF_st_x;GRF_st_z];
             Data.sw_GRF=[GRF_sw_x;GRF_sw_z];
+            Data.step=obj.step;
             
             %using this value to stop sim if the stance foot sinks more
             %than an inch into the ground
