@@ -2,12 +2,17 @@ clear all; clc;
 start_up;
 
 load('C:\Users\mungam\Documents\GitHub\Fault_Detection_Diagnostics\FiveLinkWalker_Yukai\Simulation\data\x_multi_extForceDisturbance\EscapeTime_windowsTest_stepKneeExtForce_0N_-3000N16-Mar-2021.mat');
+cur=pwd;
+data_name='newFeatures_stepKneeExtForce_0N_-3000N_22-Mar-2021.mat';
+load_dir = fullfile(cur, 'data\x_multi_extForceDisturbance',data_name);
+load(fullfile(load_dir));
 
 %% setting up variables
-PCA=1; %use principal components
+PCA=0; %use principal components
 wholeFeat=0; %use all the features
 plotParameters=0;
 diffSampleRate=0;
+shuffleColmns=1;
 
 %%
 
@@ -15,8 +20,9 @@ PCA_info=[];
 
 Data=dataInfo.Data;
 PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
-    Data.p_sw.Data(2,:)',Data.p_dsw.Data(1,:)',Data.torso_angle.Data(1,:)',...
+    Data.p_sw.Data(2,:)',Data.torso_angle.Data(1,:)',...
     Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
+    Data.y.Data(1:4,:)',Data.dy.Data(1:4,:)', Data.task.Data(1,:)'...
     Data.step.Data(end)-Data.step.Data(1,:)',... %Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)',... %don't need this
     Data.p_st.Time,Data.f_ext.Data(1,:)'];
 PCA_info_full=[];
@@ -25,10 +31,15 @@ PCA_info_full=[PCA_info_full;PCA_info];
 if diffSampleRate
     PCA_info_full=PCA_info_full(1:12:end,:); %change sampling rate
 end
-X=normalize(PCA_info_full(:,1:end-3));
+X=normalize(PCA_info_full(:,1:end-4));
 step=Data.step.Data(end)-Data.step.Data(1,:);
 step=PCA_info_full(:,end-2);
-
+if shuffleColmns
+    X_orig=X;
+    cols = size(X_orig,2);
+P = randperm(cols);
+X = X_orig(:,P);
+end
 %% PCA
 if PCA
     [L_O,S_O]=RPCA(X);
@@ -52,7 +63,7 @@ end
 
 %% creating labels
 y=[];
-escape_time=10; %# of steps before a fall
+escape_time=5; %# of steps before a fall
 [LIA,LOC]=ismember(escape_time,step);
 y(1:LOC-1)=zeros(1,LOC-1);
 y(LOC:length(step))=ones(1,length(step)-(LOC-1));
@@ -175,23 +186,31 @@ labels={'lcom y';
     'v sw x';
     'v sw z'
     'p sw x';
-    'p dsw x';
     'torso angle';
     'com height';
-    'p st x';
     'p st z';
-    'grf st x';
-    'grf st z';
-    'grf sw x';
-    'grf sw z';
+    'p_relCOMLegs'
+    'y1';
+    'y2';
+    'y3';
+    'y4';
+    'dy1';
+    'dy2';
+    'dy3';
+    'dy4';
+    'stanceToePosx';
     };
+if shuffleColmns
+    labels_org=labels;
+    labels=labels_org(P,:);
+end
 labels_best=labels(fs);
 if sum(fs)==3 || PCA
     if ~PCA
     plotInfo.xlabel=labels_best{1};
     plotInfo.ylabel=labels_best{2};
     plotInfo.zlabel=labels_best{3};
-    plotInfo.title='svm rbf PCA';
+    plotInfo.title='svm rbf';
     else
            plotInfo.xlabel='V1';
     plotInfo.ylabel='V2';

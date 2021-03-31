@@ -1,140 +1,131 @@
 start_up;
-%%
-load('C:\Users\mungam\Documents\GitHub\Fault_Detection_Diagnostics\FiveLinkWalker_Yukai\Simulation\data\x_multi_extForceDisturbance\CCA_windowsTest_stepKneeExtForce_0N_-3000N10-Mar-2021.mat')
-%%
-CCA_info=dataInfo.CCA_info;
-PCA_info=dataInfo.PCA_info;
-PCA_info_full=[];
-PCA_info_full=[PCA_info_full;PCA_info];
-%%
-X=normalize(PCA_info_full(:,1:end-2));
-% X=normalize(X);
-[L_O,S_O]=RPCA(X);
-%[PCA_info,PCA_info]
-Y=normalize(CCA_info);
-[L_C,S_C]=RPCA(Y);
+%% get data
+
+data_name='swingKnee_-3000N_24-Mar-2021.mat';
+load_dir = fullfile(cur, 'data\x_externalForceDisturbance\varyingApplicationSites',data_name);
+load(fullfile(load_dir));
+Data=dataInfo.Data;
+CCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
+    Data.p_sw.Data(2,:)',Data.torso_angle.Data(1,:)',...
+    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
+    Data.y.Data(1:4,:)',Data.dy.Data(1:4,:)',...% ...
+    Data.stanceFootxMove.Data(1,:)',...
+    Data.task.Data(1,:)',...
+    Data.step.Data(end)-Data.step.Data(1,:)',... %Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)',... %don't need this
+    Data.p_st.Time,Data.f_ext.Data(1,:)'];
+
+data_name='torso_-1000N_24-Mar-2021.mat';
+load_dir = fullfile(cur, 'data\x_externalForceDisturbance\varyingApplicationSites',data_name);
+load(fullfile(load_dir));
+Data=dataInfo.Data;
+PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
+    Data.p_sw.Data(2,:)',Data.torso_angle.Data(1,:)',...
+    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
+    Data.y.Data(1:4,:)',Data.dy.Data(1:4,:)',...% ...
+    Data.stanceFootxMove.Data(1,:)',...
+    Data.task.Data(1,:)',...
+    Data.step.Data(end)-Data.step.Data(1,:)',... %Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)',... %don't need this
+    Data.p_st.Time,Data.f_ext.Data(1,:)'];
+
+%% normalize data
+X=normalize(PCA_info(:,1:end-4));
+
+Y=normalize(CCA_info(:,1:end-4));
 
 
+
+
+%% make Y and X same size
+escape_time_fin=0; %# of steps before a fall
+step_PCA=PCA_info(:,end-2);
+step_CCA=CCA_info(:,end-2);
+[LIA_PCA,LOC_PCA]=ismember(escape_time_fin,step_PCA);
+[LIA_CCA,LOC_CCA]=ismember(escape_time_fin,step_CCA);
+X=X(1:LOC_PCA,:);
+Y=Y(1:LOC_PCA,:);
+PCA_info=PCA_info(1:LOC_PCA,:);
+CCA_info=CCA_info(1:LOC_PCA,:);
+
+% escape_time_init=7; %# of steps before a fall
+% step_PCA=PCA_info(:,end-2);
+% step_CCA=CCA_info(:,end-2);
+% [LIA_PCA,LOC_PCA_init]=ismember(escape_time_init,step_PCA);
+% [LIA_CCA,LOC_CCA_init]=ismember(escape_time_init,step_CCA);
+% if LOC_PCA_init >1
+%     X=X(LOC_PCA_init:end,:);
+% end
+% if LOC_CCA_init>1
+%     Y=Y(LOC_CCA_init:end,:);
+% end
+
+% PCA_info=PCA_info(LOC_PCA_init:LOC_PCA,:);
+% CCA_info=CCA_info(LOC_CCA_init:LOC_PCA,:);
+%% perform CCA
+[A,B,r,U,V,stats] = canoncorr(X,Y);
 %%
-[V_P,Score_P,lmd]=pca(L_O);
-% [V,Score,lmd]=pca(X);
-var_PCA=[];
-% V=V_svd;
-% lmd=lmd_svd;
-for j=1:length(lmd)
-    if j>1
-    var_PCA(j)=lmd(j)+var_PCA(j-1);
-    else
-         var_PCA(j)=lmd(j);
-    end
-end
-var_PCA=var_PCA./sum(lmd);
-%  plot(time,pitchAccel,'Color', jetcustom(j+1,:), 'LineWidth',2);
-Xavg = mean(X,2);                       % Compute mean
-Xmean = X - Xavg*ones(1,size(X,2));  
+escape_time_fin=3; %# of steps before a fall
+step_PCA=PCA_info(:,end-2);
+step_CCA=CCA_info(:,end-2);
+[LIA_PCA,LOC_PCA]=ismember(escape_time_fin,step_PCA);
+[LIA_CCA,LOC_CCA]=ismember(escape_time_fin,step_CCA);
+X=X(1:LOC_PCA,:);
+Y=Y(1:LOC_PCA,:);
+PCA_info=PCA_info(1:LOC_PCA,:);
+CCA_info=CCA_info(1:LOC_PCA,:);
+U=X*A(:,1)-mean(X*A(:,1));
+V=Y*B(:,1)-mean(Y*B(:,1));
 
-SC_P=X*V_P;
- %%
- [V_C,Score_C,lmd]=pca(L_C);
-% [V,Score,lmd]=pca(X);
-var_PCA=[];
-% V=V_svd;
-% lmd=lmd_svd;
-for j=1:length(lmd)
-    if j>1
-    var_PCA(j)=lmd(j)+var_PCA(j-1);
-    else
-         var_PCA(j)=lmd(j);
-    end
-end
-var_PCA=var_PCA./sum(lmd);
-%  plot(time,pitchAccel,'Color', jetcustom(j+1,:), 'LineWidth',2);
-Yavg = mean(Y,2);                       % Compute mean
-Ymean = Y - Yavg*ones(1,size(Y,2));  
- SC_C=Y*V_C;
- 
- %% CCA
- [A,B,r,U,V,stats] = canoncorr(SC_P,SC_C);
+%% plot
 
-
-%%
-ramp=1;
 
 figure
 
-for j=1:4
-
-V_n=V(:,j);
-U_n=U(:,j);
-
-subplot(1,4,j), hold on
-k=1;
-beg=1;
-% X=normc(PCA_info_full(beg:end,1:end-2));
-% X=normr(PCA_info_full(beg:end,1:end-2));
-% X=PCA_info_full(beg:end,1:end-2);
-goodData=0;
-if goodData
-    X=dataInfo.PCA_info_full(:,1:end-2);
-end
-Xavg = mean(X,2);                       % Compute mean
-Xmean = X - Xavg*ones(1,size(X,2));  
-obs=Xmean;
-% V=V_svd;
-% for j=1: length(PCA_info_str)
-%     obs=PCA_info_str{j}';
-
-if ramp
-    prev=round(PCA_info_full(beg,end-1));
-    jetcustom = jet(9);
-else
-prev=PCA_info_full(1,end);
-jetcustom = jet(7);
-end
-jetcustom = jet(9);
-for i=1:size(obs,1)
-    x =U_n(i) ;
-    y = V_n(i);
-
-    if goodData
-        plot(x,y,'kx','LineWidth',2);
-    else
-        if ramp
-            
-%             comp=round(PCA_info_full(i,end-1));
-            comp = fix(PCA_info_full(i,end-1)); %just saves the non-decimal part of the number
-        else
-            comp=PCA_info_full(i,end);
-        end
-        if  comp~= prev
-            prev=comp;
-            k=k+1;
-        end
+for j=1:1
+    
+    V_n=V(:,j);
+    U_n=U(:,j);
+    
+    % subplot(1,4,j), hold on
+    hold on
+    
+    
+    
+    
+    
+    
+    
         
-%         plot3(x,y,z,'kx','LineWidth',2);
-        
-      plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2);
-    end
-    %         plot3(x,y,z,'rx','LineWidth',2);
-   % plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2)
-      
+    colorNum=PCA_info(1,end-2)-PCA_info(end,end-2)+1;
   
+        
+    
+    jetcustom = jet(colorNum);
+    for i=1:size(V_n,1)
+        x =U_n(i) ;
+        y = V_n(i);
+        
+        
+        comp=PCA_info(i,end-2)-PCA_info(end,end-2)+1;
+        if comp ==0
+            comp=comp+1
+        end
+        
+        plot(x,y,'x','Color', jetcustom(comp,:),'LineWidth',2);
+    end
+    
+    
 end
 % end
-colormap(jetcustom); 
-cb = colorbar; 
-if ramp
-caxis([0 8]) 
-ylabel(cb,'time (rounded)') 
-else
- caxis([size(PCA_info_str)]) 
- ylabel(cb,'force') 
-end
-% caxis([0 k-1]) 
-caxis([1 k]) 
-%  caxis([0 7]) 
+colormap(jetcustom);
+cb = colorbar;
+
+axisVec=[-escape_time_init -escape_time_fin];
+caxis(axisVec)
+ylabel(cb,'escape time')
+
 %view(155,15), grid on, set(gca,'FontSize',13)
 xlabel(['U',num2str(j)])
 ylabel(['V',num2str(j)])
-end
+title(["CCA of -3000N swing knee, -1000N torso", "escape time for torso"])
+
 

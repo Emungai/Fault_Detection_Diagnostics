@@ -44,4 +44,9 @@ Data.stepDuration=0;
 Data.st_GRF=zeros(2,1); 
 Data.sw_GRF=zeros(2,1); 
 Data.step=0;
+    Data.y=zeros(4,1);
+            Data.dy=zeros(4,1);
+            Data.task=0;
+            Data.stanceLeg=0;
+Data.stanceFootxMove=0;
 end

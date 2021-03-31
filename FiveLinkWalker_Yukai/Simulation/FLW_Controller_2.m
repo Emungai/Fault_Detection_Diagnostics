@@ -9,19 +9,28 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
        rp_swT_ini = zeros(3,1);
        rv_swT_ini = zeros(3,1);
        step=0;
+       task=0;
+       prev_extForce=0;
+       stanceFootxInit=0;
     end % properties
     
     % PROTECTED METHODS =====================================================
     methods (Access = protected)
         
-        function [u, Data,p_stT_z] = stepImpl(obj,x,t_total,GRF,externalForce,info)
+        function [u, Data] = stepImpl(obj,x,t_total,GRF,externalForce,info)
             Data = Construct_Data();
+            
+            if obj.t0 ~=0 && obj.prev_extForce ~= externalForce
+                obj.task=obj.task+1;
+            end
+            obj.prev_extForce=externalForce; %update
             q = x(1:7);
             dq = x(8:14);
             % Let the output be torso angle, com height and delta x,delta z of swing
             % feet and com. delta = p_com - p_swfeet.
             T = 0.3; % walking period
             V = 1; % Desir ed velocity at the end of a step
+%  V = 0.5; % Desir ed velocity at the end of a step
             Kd = 50;
             Kp = 500;
             g=9.81; 
@@ -38,7 +47,8 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
             
             t = t_total - obj.t0;
             s = (t_total - obj.t0)/T;
-
+            
+          
             
             p_com = p_COM(q);
             Jp_com = Jp_COM(q);
@@ -94,13 +104,17 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
                 obj.stanceLeg = -obj.stanceLeg;
                 obj.t0 = t_total;
                 obj.step=obj.step+1;
+                
                 if obj.stanceLeg == -1
                     obj.rp_swT_ini = rp_RT;
                     obj.rv_swT_ini = rv_RT;
+                    obj.stanceFootxInit=p_LT(1);
                 else
                     obj.rp_swT_ini = rp_LT;
                     obj.rv_swT_ini = rv_LT;
+                    obj.stanceFootxInit=p_RT(1);
                 end
+                
             end
             
             
@@ -159,7 +173,10 @@ classdef FLW_Controller_2 <matlab.System & matlab.system.mixin.Propagates & matl
                 Jp_swK=Jp_RK;
             end
             
-
+            if t ==0
+                
+            end
+               
             
 
             
@@ -315,6 +332,12 @@ end
             %using this value to stop sim if the stance foot sinks more
             %than an inch into the ground
             p_stT_z=p_stT(3);
+            Data.y=y;
+            Data.dy=dy;
+            Data.task=obj.task;
+            Data.stanceLeg=obj.stanceLeg;
+            Data.stanceFootxMove=p_stT(1)-obj.stanceFootxInit;
+
         end % stepImpl
 
         %% Default functions
@@ -335,41 +358,41 @@ end
             name_5='info';
         end % getInputNamesImpl
         
-        function [name_1, name_2, name_3] = getOutputNamesImpl(~)
+        function [name_1, name_2] = getOutputNamesImpl(~)
             %GETOUTPUTNAMESIMPL Return output port names for System block
             name_1 = 'u';
             name_2 = 'Data';
-            name_3='stanceHeight';
+      
             
         end % getOutputNamesImpl
         
         % PROPAGATES CLASS METHODS ============================================
-        function [u, Data,p_stT_z] = getOutputSizeImpl(~)
+        function [u, Data] = getOutputSizeImpl(~)
             %GETOUTPUTSIZEIMPL Get sizes of output ports.
             u = [4, 1];
             Data = [1, 1];
-            p_stT_z=[1,1];
+          
         end % getOutputSizeImpl
         
-        function [u, Data,p_stT_z] = getOutputDataTypeImpl(~)
+        function [u, Data] = getOutputDataTypeImpl(~)
             %GETOUTPUTDATATYPEIMPL Get data types of output ports.
             u = 'double';
             Data = 'cassieDataBus';
-            p_stT_z='double';
+            
         end % getOutputDataTypeImpl
         
-        function [u, Data,p_stT_z] = isOutputComplexImpl(~)
+        function [u, Data] = isOutputComplexImpl(~)
             %ISOUTPUTCOMPLEXIMPL Complexity of output ports.
             u = false;
             Data = false;
-            p_stT_z=false;
+ 
         end % isOutputComplexImpl
         
-        function [u, Data,p_stT_z] = isOutputFixedSizeImpl(~)
+        function [u, Data] = isOutputFixedSizeImpl(~)
             %ISOUTPUTFIXEDSIZEIMPL Fixed-size or variable-size output ports.
             u = true;
             Data = true;
-            p_stT_z=true;
+         
         end % isOutputFixedSizeImpl
     end % methods
 end % classdef

@@ -4,7 +4,8 @@
 %(code with 5 likes)
 fin=3;%number of dimensions
 Xt=FullData(:,1:fin);
-eucl=1;
+eucl=0;
+city=1;
 %% calculating parameters for DBSCAN
 %euclidean distance
 k=fin*2; %# of min points
@@ -23,6 +24,8 @@ figure
 histogram(kn_distance) 
 if eucl
     title('Euclidean')
+elseif city
+    title('Manhattan')
 else
     title('Mahalanobis')
 end
@@ -38,19 +41,28 @@ min_pts=k;
 figure
 histogram(mD(:,6))
 
+%manhattan distance
+[m2Idx,mD2] = knnsearch(Xt,Xt,'K',6,'Distance','cityblock');
+%look at the elbow in the histogram to determine eps
+figure
+histogram(mD2(:,6))
 min_pts=k;
+
 if eucl
 eps=0.2; %euclidean distance
 [idx,corepts] = dbscan(Xt,eps,min_pts); % The default distance metric is Euclidean distance;
 
+elseif city
+    eps=0.13;
+    [idx,corepts] = dbscan(Xt,eps,min_pts,'Distance','cityblock'); % The default distance metric is Euclidean distance;
 else
-    eps=0.15;
+    eps=0.12;
     [idx,corepts] = dbscan(Xt,eps,min_pts,'Distance','mahalanobis'); % The default distance metric is Euclidean distance;
 
 end
 
 %% graph
-color = lines(13); % Generate color values
+color = lines(length(unique(idx))); % Generate color values
 % eps=0.18;
 % min_pts=2;
 % eps=0.15;
@@ -65,6 +77,9 @@ xlabel('V1')
 ylabel('V2')
 if eucl
 title((['DBSCAN Using Euclidean Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
+elseif city
+   title((['DBSCAN Using Manhattan Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
+ 
 else
     title((['DBSCAN Using Mahalanobis Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
 
@@ -86,8 +101,11 @@ ylabel('V2')
 zlabel('V3')
 if eucl
 title((['3D DBSCAN Using Euclidean Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
+elseif city
+   title((['DBSCAN Using Manhattan Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
+
 else
-    title((['3D DBSCAN Using Mahalanobis Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
+    title((['3D DBSCAN Using seuclidean Distance Metric','eps:',string(eps),'min points:',string(min_pts)]))
 
 end
 hold off
