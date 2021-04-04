@@ -1,0 +1,36 @@
+<mujoco model="five_link_walker">
+    <compiler angle="radian" />
+    <option gravity="0 0 -9.81" />
+    <size njmax="500" nconmax="100" />
+    <worldbody>
+
+<light directional="true" cutoff="4" exponent="20" diffuse="1 1 1" specular="0 0 0" pos=".9 .3 2.5" dir="-.9 -.3 -2.5 "/>
+	
+		<!-- ======= Ground ======= -->
+		<geom name="ground" type="plane" pos="0 0 0" size="0.5 1 2" rgba=" .25 .26 .25 1" contype="0" conaffinity="0"/>
+		<site name="rFix" pos="0 -.2 .005"/>
+		<site name="lFix" pos="0 .2 .005"/>
+
+        <geom size="0.025 0.315" pos="0 0 2.315" type="cylinder" contype="1" conaffinity="2" group="1" rgba="0 255 61 0.9" />
+        <body name="right_thigh" pos="0 0 2" quat="0.540302 0 0.841471 0">
+            <inertial pos="0 0 0.11" quat="0.707107 0 0 0.707107" mass="6.8" diaginertia="0.156667 0.156667 0.156667" />
+            <joint name="q1_right" pos="0 0 0" axis="0 1 0" />
+            <geom size="0.025 0.2" pos="0 0 0.2" type="cylinder" contype="2" conaffinity="3" group="1" rgba="0 0 1 1" />
+            <body name="right_shin" pos="0 0 0.4">
+                <inertial pos="0 0 0.24" quat="0.707107 0 0 0.707107" mass="3.2" diaginertia="0.0666667 0.0666667 0.0666667" />
+                <joint name="q2_right" pos="0 0 0" axis="0 1 0" />
+                <geom size="0.025 0.2" pos="0 0 0.2" type="cylinder" contype="2" conaffinity="3" group="1" rgba="1 0 0 1" />
+            </body>
+        </body>
+        <body name="left_thigh" pos="0 0 2" quat="0.315322 0 0.948985 0">
+            <inertial pos="0 0 0.11" quat="0.707107 0 0 0.707107" mass="6.8" diaginertia="0.156667 0.156667 0.156667" />
+            <joint name="q1_left" pos="0 0 0" axis="0 1 0" />
+            <geom size="0.025 0.2" pos="0 0 0.2" type="cylinder" contype="2" conaffinity="4" group="1" rgba="1 0 0 1" />
+            <body name="left_shin" pos="0 0 0.4">
+                <inertial pos="0 0 0.24" quat="0.707107 0 0 0.707107" mass="3.2" diaginertia="0.0666667 0.0666667 0.0666667" />
+                <joint name="q2_left" pos="0 0 0" axis="0 1 0" />
+                <geom size="0.025 0.2" pos="0 0 0.2" type="cylinder" contype="2" conaffinity="4" group="1" rgba="0 0 1 1" />
+            </body>
+        </body>
+    </worldbody>
+</mujoco>
