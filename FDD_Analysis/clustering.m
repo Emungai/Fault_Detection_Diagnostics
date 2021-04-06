@@ -1,4 +1,4 @@
-%% DBSCAN
+%% DBSCAN (run after running PCA)
 %from
 %https://stackoverflow.com/questions/43160240/how-to-plot-a-k-distance-graph-in-python
 %(code with 5 likes)

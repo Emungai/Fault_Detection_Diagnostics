@@ -14,26 +14,26 @@ plotParameters=0;
 diffSampleRate=0;
 shuffleColmns=1;
 
-%%
-
-PCA_info=[];
-
-Data=dataInfo.Data;
-PCA_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
-    Data.p_sw.Data(2,:)',Data.torso_angle.Data(1,:)',...
-    Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
-    Data.y.Data(1:4,:)',Data.dy.Data(1:4,:)', Data.task.Data(1,:)'...
-    Data.step.Data(end)-Data.step.Data(1,:)',... %Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)',... %don't need this
-    Data.p_st.Time,Data.f_ext.Data(1,:)'];
-PCA_info_full=[];
-PCA_info_full=[PCA_info_full;PCA_info];
-
-if diffSampleRate
-    PCA_info_full=PCA_info_full(1:12:end,:); %change sampling rate
+%% load data
+load_info.fivelink=1;
+load_info.digit=0;
+load_info.noise=0;
+if fivelink
+    load_info.walk=1;
+    load_info.stand=0;
+elseif digit
+    load_info.walk=0;
+    load_info.stand=1;
 end
-X=normalize(PCA_info_full(:,1:end-4));
-step=Data.step.Data(end)-Data.step.Data(1,:);
-step=PCA_info_full(:,end-2);
+
+[FDD_info, FDD_info_analyze]=utils.load_data(load_info);
+%% 
+if diffSampleRate
+    FDD_info=FDD_info(1:12:end,:); %change sampling rate
+    FDD_info_analyze=FDD_info_analyze(1:12:end,:); %change sampling rate
+end
+X=normalize(FDD_info_analyze);
+step=FDD_info(:,end-2);
 if shuffleColmns
     X_orig=X;
     cols = size(X_orig,2);
@@ -42,6 +42,7 @@ X = X_orig(:,P);
 end
 %% PCA
 if PCA
+    fprintf('Starting PCA') ;
     [L_O,S_O]=RPCA(X);
     [V,Score,lmd]=pca(L_O);
     
@@ -55,7 +56,7 @@ if PCA
     end
     var_PCA=var_PCA./sum(lmd);
     
-    X=X*V(:,1:3); %project X into the PCA coordinate
+    X=X*V(:,1:3); %project X onto the PCA coordinate
    fprintf('PCA done') ;
 end
 

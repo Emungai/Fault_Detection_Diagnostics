@@ -1,0 +1,56 @@
+function load_data(info)
+fivelink=info.fivelink;
+digit=info.digit;
+noise=info.noise;
+walk=info.walk;
+stand=info.stand;
+%% fivelink
+cur=pwd;
+if fivelink
+    
+    data_dir='..\FiveLinkWalker_Yukai\Simulation';
+    if walk
+        if ~noise
+            data_name='newFeatures_stepKneeExtForce_0N_-3000N_22-Mar-2021.mat';
+            load_dir = fullfile(cur, data_dir,'data\x_multi_extForceDisturbance',data_name);
+        else
+            %noisy data
+            data_name='stepKneeExtForce_0N_-3000N_23-Mar-2021.mat';
+            load_dir = fullfile(cur, data_dir, 'data\noisy_data',data_name);
+            
+        end
+        load(fullfile(load_dir));
+        %FDD_info consists of:
+        %lCoM=angular momentum about the center of mass
+        %lstance=angular momentum about the stance foot
+        %v_sw=swing leg velocity
+        %p_sw=swing leg position
+        %torso_angle=torso angle
+        %CoM_height=relative height of center of mass with respect to stance foot (p_com-p_st)
+        %p_st=stance leg z position
+        %p_relCoMLegs = 
+        %stanceFootxMove= how far the stance foot moves in
+        FDD_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
+            Data.p_sw.Data(2,:)',Data.torso_angle.Data(1,:)',...
+            Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
+            Data.y.Data(1:4,:)',Data.dy.Data(1:4,:)',...% ...
+            Data.stanceFootxMove.Data(1,:)',...
+            Data.task.Data(1,:)',...
+            Data.step.Data(end)-Data.step.Data(1,:)',... %Data.st_GRF.Data(1:2,:)',Data.sw_GRF.Data(1:2,:)',... %don't need this
+            Data.p_st.Time,Data.f_ext.Data(1,:)'];
+        
+        FDD_info_analyze=FDD_info(:,1:end-4);
+        
+        
+    end
+    
+    %% digit
+elseif digit
+    %%
+    if stand
+    end
+else
+    fprintf('Unable to Load Data')
+    
+end
+end
