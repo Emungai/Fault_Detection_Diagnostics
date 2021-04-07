@@ -1,4 +1,4 @@
-function load_data(info)
+function [FDD_info,FDD_info_analyze]= load_data(info)
 fivelink=info.fivelink;
 digit=info.digit;
 noise=info.noise;
@@ -11,15 +11,16 @@ if fivelink
     data_dir='..\FiveLinkWalker_Yukai\Simulation';
     if walk
         if ~noise
-            data_name='newFeatures_stepKneeExtForce_0N_-3000N_22-Mar-2021.mat';
-            load_dir = fullfile(cur, data_dir,'data\x_multi_extForceDisturbance',data_name);
+            data_name='swingKnee_-3000N_24-Mar-2021.mat';
+            load_dir = fullfile(cur, data_dir,'data\x_externalForceDisturbance\varyingApplicationSites',data_name);
         else
             %noisy data
-            data_name='stepKneeExtForce_0N_-3000N_23-Mar-2021.mat';
+            data_name='stepKneeExtForce_0N_-3000N_30-Mar-2021.mat';
             load_dir = fullfile(cur, data_dir, 'data\noisy_data',data_name);
             
         end
         load(fullfile(load_dir));
+        Data=dataInfo.Data;
         %FDD_info consists of:
         %lCoM=angular momentum about the center of mass
         %lstance=angular momentum about the stance foot
@@ -28,8 +29,16 @@ if fivelink
         %torso_angle=torso angle
         %CoM_height=relative height of center of mass with respect to stance foot (p_com-p_st)
         %p_st=stance leg z position
-        %p_relCoMLegs = 
-        %stanceFootxMove= how far the stance foot moves in
+        %p_relCoMLegs = CoM x position subtracted from the average x
+        %position of the legs
+        %stanceFootxMove= distance stance foot moves in x axis during a single step
+        %task= records when the external force applied on a robot changes
+            %e.g. at beginning robot has no ext force so task is 0 but when ext
+            %force is applied task is 1
+        % Data.step.Data(end)-Data.step.Data(1,:)'= escape time of robot in
+        % terms of steps robot takes before it falls
+        %Time = time of the simulation
+        %f_ext = external force applied to robot
         FDD_info=[Data.lCoM.Data(1,:)',Data.lstance.Data(1,:)',Data.v_sw.Data(1:2,:)',...
             Data.p_sw.Data(2,:)',Data.torso_angle.Data(1,:)',...
             Data.CoM_height.Data(1,:)',Data.p_st.Data(2,:)',Data.p_relCoMLegs.Data(1,:)',...%Data.stepDuration.Data(1,:)',...
@@ -44,10 +53,11 @@ if fivelink
         
     end
     
-    %% digit
+%% digit
 elseif digit
-    %%
+   data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl';
     if stand
+        data_name='';
     end
 else
     fprintf('Unable to Load Data')

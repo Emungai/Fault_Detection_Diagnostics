@@ -53,10 +53,19 @@ if fivelink
         
     end
     
-    %% digit
+%% digit
 elseif digit
-    %%
+   data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl';
     if stand
+        data_name='log_ctrl_y_100N_4-4-21.txt';
+        load_dir = fullfile(cur, data_dir,data_name);
+        [digitData,types]=utils.getDigitLoggedData(load_dir);
+%         data_name='log_ctrl_y_50N_4-4-21.txt';
+%         data_name='log_ctrl_y_40N_4-4-21.txt';
+
+%read in data from text file
+
+        
     end
 else
     fprintf('Unable to Load Data')
