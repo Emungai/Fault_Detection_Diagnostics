@@ -4,6 +4,7 @@ digit=info.digit;
 noise=info.noise;
 walk=info.walk;
 stand=info.stand;
+saveData=info.saveData
 %% fivelink
 cur=pwd;
 if fivelink
@@ -33,8 +34,8 @@ if fivelink
         %position of the legs
         %stanceFootxMove= distance stance foot moves in x axis during a single step
         %task= records when the external force applied on a robot changes
-            %e.g. at beginning robot has no ext force so task is 0 but when ext
-            %force is applied task is 1
+        %e.g. at beginning robot has no ext force so task is 0 but when ext
+        %force is applied task is 1
         % Data.step.Data(end)-Data.step.Data(1,:)'= escape time of robot in
         % terms of steps robot takes before it falls
         %Time = time of the simulation
@@ -53,18 +54,31 @@ if fivelink
         
     end
     
-%% digit
+    %% digit
 elseif digit
-   data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl';
+    data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl';
     if stand
-        data_name='log_ctrl_y_100N_4-4-21.txt';
+                data_name='log_ctrl_y_50N_4-4-21.txt';
+%                 data_name='log_ctrl_y_40N_4-4-21.txt';
+%         data_name='log_ctrl_y_100N_4-4-21.txt';
         load_dir = fullfile(cur, data_dir,data_name);
-        [digitData,types]=utils.getDigitLoggedData(load_dir);
-%         data_name='log_ctrl_y_50N_4-4-21.txt';
-%         data_name='log_ctrl_y_40N_4-4-21.txt';
-
-%read in data from text file
-
+        [digitData,~]=utils.getDigitLoggedData(load_dir);
+        [FDD_info,FDD_info_analyze]=utils.getDigitFddData(digitData);
+        if saveData
+            
+            data_save.FDD_info=FDD_info;
+            data_save.FDD_info_analyze=FDD_info_analyze;
+            name_save='50N_4-4-21';
+            save_dir=fullfile(cur,'/data/digit/y_force');
+            file_name=[name_save,'.mat'];
+            fprintf('Saving info %s\n',file_name);
+            if ~exist(save_dir,'dir'), mkdir(save_dir);end
+            
+            save(fullfile(save_dir,file_name),'data_save');
+            fprintf('Saved');
+        end
+        
+        
         
     end
 else

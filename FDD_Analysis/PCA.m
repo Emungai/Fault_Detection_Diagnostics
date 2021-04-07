@@ -2,19 +2,22 @@
 addpath(genpath(pwd));
 addpath('C:\Users\mungam\Documents\School\TextBooks_Resources\Textboooks\Brunton_Data-Driven Science and Engineering\Code\CH03');
 addpath('C:\Users\mungam\Documents\School\softwareTools\libsvm\libsvm-3.24\matlab');
+
+
 %% setting up variables
 %loading data
-fivelink=1;
-digit=0;
+fivelink=0;
+digit=1;
 noise=0; %use noisy data
 
 %plot
 plot_LminusS=1; %set to 1 if you want to plot L minus S
 
 %% loading Data if necessary
-load_info.fivelink=1;
-load_info.digit=0;
-load_info.noise=0;
+load_info.fivelink=fivelink;
+load_info.digit=digit;
+load_info.noise=noise;
+load_info.saveData=1;
 if fivelink
     load_info.walk=1;
     load_info.stand=0;
