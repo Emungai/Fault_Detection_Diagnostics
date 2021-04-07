@@ -65,7 +65,7 @@ elseif digit
     data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl';
     if stand
         if strcmp(forceAxis,'y')
-            data_name=['log_ctrl_y_', name_save,'.txt'];
+                       data_name=['log_ctrl_y_', name_save,'.txt'];
             save_dir=fullfile(cur,'/data/digit/y_force');
             
         elseif strcmp(forceAxis,'x')
@@ -88,19 +88,10 @@ elseif digit
                 fprintf('Saved');
             end
         else
-            load(fullfile(save_dir,[name_save,'.mat']))
+            logger=load(fullfile(save_dir,[name_save,'.mat']))
         end
         
-        q_all=logger.q_all;
-        dq_all=logger.dq_all;
-        ua_all=logger.ua_all;
-        ud_all=logger.ud_all;
-        LG=logger.LG;
-        L_LeftFoot=logger.L_LeftFoot;
-        L_RightFoot=logger.L_RightFoot;
-        rp_COMFoot=logger.rp_COMFoot;
-        task=logger.task;
-        time=logger.time;
+        
         
         if strcmp(forceAxis,'y') && ~allFeat
             q_all_f=q_all([1,2,3,6,7,13,14,18,24,25],:);
@@ -134,7 +125,7 @@ elseif digit
             
             
         end
-        FDD_info=[q_all_f',dq_all_f',(ua_all_f-ud_all_f)',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
+        FDD_info=[q_all_f',dq_all_f',(ua_all_f-ud_all_f)',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',t'];
         FDD_info_analyze=FDD_info(:,1:end-2);
         
         
