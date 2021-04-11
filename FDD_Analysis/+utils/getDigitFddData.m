@@ -15,7 +15,7 @@ dq_all=logged_data(idx_djoints).Data;
 ua_all=logged_data(idx_motorsCurrent).Data;
 ud_all=logged_data(idx_motorsDesired).Data;
 
-t=logged_data(1).Data;
+t=logged_data(end).Data;
 %recording when the force is applied and when it's not
 force_t=t-5; %positive is with external force, negative is without ext force
 [r,c]=find(force_t<0);
@@ -134,6 +134,6 @@ logger.rp_COMFoot=rp_COMFoot;
 logger.task=task;
 logger.time=t;
 logger.feat_names=feat;
-display('Saving data into done...')
+display('Saving data done...')
 end
 

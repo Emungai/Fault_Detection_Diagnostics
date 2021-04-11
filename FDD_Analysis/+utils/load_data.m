@@ -66,11 +66,11 @@ elseif digit
     if stand
         if strcmp(forceAxis,'y')
             data_name=['log_ctrl_y_', name_save,'.txt'];
-            save_dir=fullfile(cur,'/data/digit/y_force/Biped_Controller');
+            save_dir=fullfile(cur,'/data/digit/Biped_Controller/y_force');
             
         elseif strcmp(forceAxis,'x')
             data_name=['log_ctrl_x_', name_save,'.txt'];
-            save_dir=fullfile(cur,'/data/digit/x_force/Biped_Controller');
+            save_dir=fullfile(cur,'/data/digit/Biped_Controller/x_force');
         end
         if compileFDD_Data
             

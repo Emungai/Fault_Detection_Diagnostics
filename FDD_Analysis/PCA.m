@@ -1,5 +1,5 @@
 clear all; clc;
-%% load paths
+%% load pathsjjj
 addpath(genpath(pwd));
 addpath('C:\Users\mungam\Documents\School\TextBooks_Resources\Textboooks\Brunton_Data-Driven Science and Engineering\Code\CH03');
 addpath('C:\Users\mungam\Documents\School\softwareTools\libsvm\libsvm-3.24\matlab');
@@ -27,7 +27,7 @@ elseif digit
     load_info.stand=1;
     load_info.allFeat=0;
     load_info.compileFDD_Data=1;
-    load_info.forceAxis='x';
+    load_info.forceAxis='y';
     load_info.name_save='100N_4-10-21';
 % load_info.name_save='200N_4-7-21';
 end
