@@ -8,31 +8,31 @@ eucl=0;
 city=1;
 %% calculating parameters for DBSCAN
 %euclidean distance
-k=fin*2; %# of min points
-    kn_distance = []
-    for i=1:length(Xt)
-        eucl_dist = [];
-        for j=1:length(Xt)
-            eucl_dist(j)=norm(Xt(i,:)-Xt(j,:));  %((Xt(i,1) - Xt(j,1)) ^ 2 +(Xt(i,2) - Xt(j,2)) ^ 2)^0.5;
-           
-        end
-        eucl_dist_sorted=sort(eucl_dist);
-        kn_distance(end+1)=(eucl_dist_sorted(k));
-    end
-%look at the elbow in the histogram to determine eps    
-figure
-histogram(kn_distance) 
-if eucl
-    title('Euclidean')
-elseif city
-    title('Manhattan')
-else
-    title('Mahalanobis')
-end
-eps=0.2; %euclidean distance
-% eps=0.14;
-min_pts=k;
-[idx,corepts] = dbscan(Xt,eps,min_pts);
+% k=fin*2; %# of min points
+%     kn_distance = []
+%     for i=1:length(Xt)
+%         eucl_dist = [];
+%         for j=1:length(Xt)
+%             eucl_dist(j)=norm(Xt(i,:)-Xt(j,:));  %((Xt(i,1) - Xt(j,1)) ^ 2 +(Xt(i,2) - Xt(j,2)) ^ 2)^0.5;
+%            
+%         end
+%         eucl_dist_sorted=sort(eucl_dist);
+%         kn_distance(end+1)=(eucl_dist_sorted(k));
+%     end
+% %look at the elbow in the histogram to determine eps    
+% figure
+% histogram(kn_distance) 
+% if eucl
+%     title('Euclidean')
+% elseif city
+%     title('Manhattan')
+% else
+%     title('Mahalanobis')
+% end
+% eps=0.2; %euclidean distance
+% % eps=0.14;
+% min_pts=k;
+% [idx,corepts] = dbscan(Xt,eps,min_pts);
 
 
 %mahalbonois distance
@@ -47,7 +47,7 @@ histogram(mD(:,6))
 figure
 histogram(mD2(:,6))
 min_pts=k;
-
+%%
 if eucl
 eps=0.2; %euclidean distance
 [idx,corepts] = dbscan(Xt,eps,min_pts); % The default distance metric is Euclidean distance;

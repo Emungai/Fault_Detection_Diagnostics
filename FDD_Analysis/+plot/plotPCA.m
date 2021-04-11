@@ -8,6 +8,8 @@ colorNum=plotInfo.colorNum; %number of colors for the map
 V=plotInfo.V; %principal components
 axisVec=plotInfo.axisVec; %legend entry for caxis
 titlePlot=plotInfo.titlePlot;
+digit=plotInfo.digit;
+fivelink=plotInfo.fivelink;
 %%
 figure, hold on
 k=1;
@@ -24,7 +26,11 @@ obs=Xmean;
 %     obs=PCA_info_str{j}';
 
 if ramp
+    if fivelink
     prev=round(PCA_info_full(beg,end-1));
+    elseif digit
+         prev=fix(PCA_info_full(beg,end));
+    end
     %     jetcustom = jet(9);
 elseif escapeTime
     prev=PCA_info_full(1,end-2);
@@ -43,8 +49,12 @@ for i=1:size(obs,1)
     if ramp
         
         %             comp=round(PCA_info_full(i,end-1));
+        if fivelink
         comp = fix(PCA_info_full(i,end-1)); %just saves the non-decimal part of the number
-    elseif escapeTime
+        elseif digit
+            comp = fix(PCA_info_full(i,end)); %just saves the non-decimal part of the number
+        end
+        elseif escapeTime
         comp=PCA_info_full(i,end-2);
     else
         comp=PCA_info_full(i,end);
@@ -67,8 +77,8 @@ end
 colormap(jetcustom);
 cb = colorbar;
 if ramp
-    caxis([0 8])
-    ylabel(cb,'time (rounded)')
+%     caxis([0 8])
+    ylabel(cb,'time ')
 elseif escapeTime
     %     caxis([-PCA_info_full(1,end-2) 0])
     ylabel(cb,'escape time')

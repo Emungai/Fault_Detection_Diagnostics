@@ -1,3 +1,4 @@
+clear all; clc;
 %% load paths
 addpath(genpath(pwd));
 addpath('C:\Users\mungam\Documents\School\TextBooks_Resources\Textboooks\Brunton_Data-Driven Science and Engineering\Code\CH03');
@@ -25,13 +26,31 @@ elseif digit
     load_info.walk=0;
     load_info.stand=1;
     load_info.allFeat=0;
-    load_info.compileFDD_Data=1;
-    load_info.forceAxis='x';
-%     load_info.name_save='100N_4-4-21';
-load_info.name_save='200N_4-7-21';
+    load_info.compileFDD_Data=0;
+    load_info.forceAxis='y';
+    load_info.name_save='100N_4-4-21';
+% load_info.name_save='200N_4-7-21';
 end
 
-[FDD_info, FDD_info_analyze]=utils.load_data(load_info);
+[FDD_info, FDD_info_analyze,feat]=utils.load_data(load_info);
+%% figure out when force was applied
+a=FDD_info(:,1)-1e-3;
+[r,c]=find(a <0);
+force_t=FDD_info(r(end),end);
+%%
+if digit
+    if strcmp(load_info.forceAxis,'x')
+    a=FDD_info(:,end)-8.3;
+    elseif strcmp(load_info.forceAxis,'y')
+        a=FDD_info(:,end)-10;
+    end
+    [r,c]=find(a <0);
+    FDD_info=FDD_info(1:r(end),:);
+    FDD_info_analyze=FDD_info_analyze(1:r(end),:);
+end
+% %getting rid of velocity
+% FDD_info=FDD_info(:,[1:10,21:42]);
+% FDD_info_analyze=FDD_info_analyze(:,[1:10,21:40]);
 %% normalize data
 %need to run this on matlab 2018 or recent
 X=normalize(FDD_info_analyze);
@@ -58,11 +77,18 @@ fprintf('\n starting plot') ;
 %plotting variables
 plotInfo.X=X;
 plotInfo.PCA_info_full=FDD_info;
-plotInfo.escapeTime=1; %plot wrt escape time (# of steps before failure)
-plotInfo.ramp=0; %plot wrt time
+plotInfo.escapeTime=0; %plot wrt escape time (# of steps before failure)
+plotInfo.ramp=1; %plot wrt time
+plotInfo.digit=digit;
+plotInfo.fivelink=fivelink;
 if plotInfo.ramp
+    if fivelink
     colorNum=9;
     axisVec=[0 round(FDD_info(end,end-1))];
+    elseif digit
+        colorNum=fix(FDD_info(end,end))+1;
+    axisVec=[0 fix(FDD_info(end,end))];
+    end
 elseif plotInfo.escapeTime
     colorNum=FDD_info(1,end-2)+1;
     axisVec=[-FDD_info(1,end-2) 0];
@@ -73,8 +99,8 @@ end
 plotInfo.colorNum=colorNum;
 plotInfo.V=V;
 plotInfo.axisVec=axisVec;
-plotInfo.titlePlot='All RPCA-PCA(L)-X';
-
+% plotInfo.titlePlot='All RPCA-PCA(L)-X';
+plotInfo.titlePlot='DIGIT All RPCA-PCA(L)-X-ExtForce(y 100N)';
 FullData=plot.plotPCA(plotInfo);
 %%
 if plot_LminusS

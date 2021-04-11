@@ -1,4 +1,4 @@
-function [FDD_info,FDD_info_analyze]= load_data(info)
+function [FDD_info,FDD_info_analyze,feat_f]= load_data(info)
 fivelink=info.fivelink;
 digit=info.digit;
 noise=info.noise;
@@ -101,42 +101,63 @@ elseif digit
         rp_COMFoot=logger.rp_COMFoot;
         task=logger.task;
         time=logger.time;
+        feat=logger.feat_names;
+        feat_all=[];
+        for i=1:length(feat)
+            
+            feat_all=[feat_all,feat{i}];
+        end
         
         if strcmp(forceAxis,'y') && ~allFeat
-            q_all_f=q_all([1,2,3,6,7,13,14,18,24,25],:);
-            dq_all_f=dq_all([1,2,3,6,7,13,14,18,24,25],:);
-            ua_all_f=ua_all([1,5,6,7,11,12,13,17],:);
-            ud_all_f=ud_all([1,5,6,7,11,12,13,17],:);
-            LG_all_f=LG(1,:);
-            L_LeftFoot_f=L_LeftFoot(1,:);
-            L_RightFoot_f=L_RightFoot(1,:);
-            rp_COMFoot_f=rp_COMFoot([2,3],:);
+            q_idx=[2,3,6,7,13,14,18,24,25];
+            u_idx=[1,5,6,7,11,12,13,17];
+            L_idx=1;
+            p_idx=[2,3];
+            q_all_f=q_all(q_idx,:);
+            dq_all_f=dq_all(q_idx,:);
+            ua_all_f=ua_all(u_idx,:);
+            ud_all_f=ud_all(u_idx,:);
+            LG_all_f=LG(L_idx,:);
+            L_LeftFoot_f=L_LeftFoot(L_idx,:);
+            L_RightFoot_f=L_RightFoot(L_idx,:);
+            rp_COMFoot_f=rp_COMFoot(p_idx,:);
+            
             
             
         elseif strcmp(forceAxis,'x') && ~allFeat
-            q_all_f=q_all([1,3,5,9,10,11,12,15,17,20,21,22,23,26,28],:);
-            dq_all_f=dq_all([1,3,5,9,10,11,12,15,17,20,21,22,23,26,28],:);
-            ua_all_f=ua_all([3,4,5,6,9,10,11,10,14,15,18,20],:);
-            ud_all_f=ud_all([3,4,5,6,9,10,11,10,14,15,18,20],:);
-            LG_all_f=LG(2,:);
-            L_LeftFoot_f=L_LeftFoot(2,:);
-            L_RightFoot_f=L_RightFoot(2,:);
-            rp_COMFoot_f=rp_COMFoot([1,3],:);
+            q_idx=[1,3,5,9,10,11,12,15,17,20,21,22,23,26,28];
+            u_idx=[3,4,5,6,9,10,11,10,14,15,18,20];
+            L_idx=2;
+            p_idx=[1,3];
+            q_all_f=q_all(q_idx,:);
+            dq_all_f=dq_all(q_idx,:);
+            ua_all_f=ua_all(u_idx,:);
+            ud_all_f=ud_all(u_idx,:);
+            LG_all_f=LG(L_idx,:);
+            L_LeftFoot_f=L_LeftFoot(L_idx,:);
+            L_RightFoot_f=L_RightFoot(L_idx,:);
+            rp_COMFoot_f=rp_COMFoot(p_idx,:);
+            
         else
+            q_idx=length(feat{1});
+            u_idx=length(feat{3});
+            L_idx=3; p_idx=L_idx;
             q_all_f=q_all;
             dq_all_f=dq_all;
             ua_all_f=ua_all;
             ud_all_f=ud_all;
             LG_all_f=LG;
-            L_LeftFoot_f=L_LeftFoot
+            L_LeftFoot_f=L_LeftFoot;
             L_RightFoot_f=L_RightFoot;
             rp_COMFoot_f=rp_COMFoot;
             
             
         end
-        FDD_info=[q_all_f',dq_all_f',(ua_all_f-ud_all_f)',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
-        FDD_info_analyze=FDD_info(:,1:end-2);
+        %         FDD_info=[q_all_f',dq_all_f',(ua_all_f-ud_all_f)',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
+        FDD_info=[q_all_f',dq_all_f',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
         
+        FDD_info_analyze=FDD_info(:,1:end-2);
+        feat_f=[feat{1}(q_idx), feat{2}(q_idx), feat{3}(u_idx),feat{4}(L_idx),feat{5}(L_idx),feat{6}(L_idx),feat{7}(p_idx),feat{8},feat{9}];
         
         
     end
