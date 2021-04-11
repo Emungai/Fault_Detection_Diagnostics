@@ -62,15 +62,15 @@ if fivelink
     
     %% digit
 elseif digit
-    data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl';
+    data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl/Biped_Controller';
     if stand
         if strcmp(forceAxis,'y')
             data_name=['log_ctrl_y_', name_save,'.txt'];
-            save_dir=fullfile(cur,'/data/digit/y_force');
+            save_dir=fullfile(cur,'/data/digit/y_force/Biped_Controller');
             
         elseif strcmp(forceAxis,'x')
             data_name=['log_ctrl_x_', name_save,'.txt'];
-            save_dir=fullfile(cur,'/data/digit/x_force');
+            save_dir=fullfile(cur,'/data/digit/x_force/Biped_Controller');
         end
         if compileFDD_Data
             

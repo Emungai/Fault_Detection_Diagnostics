@@ -26,9 +26,9 @@ elseif digit
     load_info.walk=0;
     load_info.stand=1;
     load_info.allFeat=0;
-    load_info.compileFDD_Data=0;
-    load_info.forceAxis='y';
-    load_info.name_save='100N_4-4-21';
+    load_info.compileFDD_Data=1;
+    load_info.forceAxis='x';
+    load_info.name_save='100N_4-10-21';
 % load_info.name_save='200N_4-7-21';
 end
 
