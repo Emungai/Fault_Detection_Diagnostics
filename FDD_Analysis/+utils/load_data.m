@@ -153,7 +153,7 @@ elseif digit
             
             
         end
-        %         FDD_info=[q_all_f',dq_all_f',(ua_all_f-ud_all_f)',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
+%                 FDD_info=[q_all_f',dq_all_f',(ua_all_f-ud_all_f)',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
         FDD_info=[q_all_f',dq_all_f',LG',L_LeftFoot',L_RightFoot',rp_COMFoot',task',time'];
         
         FDD_info_analyze=FDD_info(:,1:end-2);

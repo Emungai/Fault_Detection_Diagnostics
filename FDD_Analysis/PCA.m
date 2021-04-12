@@ -25,35 +25,28 @@ if fivelink
 elseif digit
     load_info.walk=0;
     load_info.stand=1;
-    load_info.allFeat=0;
-    load_info.compileFDD_Data=1;
+    load_info.allFeat=1;
+    load_info.compileFDD_Data=0;
     load_info.forceAxis='y';
     load_info.name_save='100N_4-10-21';
 % load_info.name_save='200N_4-7-21';
 end
 
 [FDD_info, FDD_info_analyze,feat]=utils.load_data(load_info);
-%% figure out when force was applied
-a=FDD_info(:,1)-1e-3;
-[r,c]=find(a <0);
-force_t=FDD_info(r(end),end);
-%%
-if digit
-    if strcmp(load_info.forceAxis,'x')
-    a=FDD_info(:,end)-8.3;
-    elseif strcmp(load_info.forceAxis,'y')
-        a=FDD_info(:,end)-10;
-    end
-    [r,c]=find(a <0);
-    FDD_info=FDD_info(1:r(end),:);
-    FDD_info_analyze=FDD_info_analyze(1:r(end),:);
-end
-% %getting rid of velocity
-% FDD_info=FDD_info(:,[1:10,21:42]);
-% FDD_info_analyze=FDD_info_analyze(:,[1:10,21:40]);
+
+%% only keep the part where the biped controller was running
+ a=FDD_info(:,end)-3;
+ [r,c]=find(a <0);
+ FDD_info=FDD_info(r(end)+1:length(FDD_info),:);
+  FDD_info_analyze=FDD_info_analyze(r(end)+1:length(FDD_info_analyze),:);
+%% get different sample rate
+FDD_info=FDD_info(1:12:end,:); %change sampling rate
+FDD_info_analyze=FDD_info_analyze(1:12:end,:); %change sampling rate
+
 %% normalize data
 %need to run this on matlab 2018 or recent
-X=normalize(FDD_info_analyze);
+X=normc(FDD_info_analyze);
+% X=normalize(FDD_info_analyze);
 
 %% RPCA, PCA
 [L_O,S_O]=RPCA(X);
@@ -100,7 +93,7 @@ plotInfo.colorNum=colorNum;
 plotInfo.V=V;
 plotInfo.axisVec=axisVec;
 % plotInfo.titlePlot='All RPCA-PCA(L)-X';
-plotInfo.titlePlot='DIGIT All RPCA-PCA(L)-X-ExtForce(y 100N)';
+plotInfo.titlePlot='DIGIT All RPCA-PCA(L)-X-ExtForce(100N)';
 FullData=plot.plotPCA(plotInfo);
 %%
 if plot_LminusS
