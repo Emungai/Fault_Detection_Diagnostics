@@ -25,9 +25,9 @@ if fivelink
 elseif digit
     load_info.walk=0;
     load_info.stand=1;
-    load_info.allFeat=1;
+    load_info.allFeat=0;
     load_info.compileFDD_Data=0;
-    load_info.forceAxis='y';
+    load_info.forceAxis='x';
     load_info.name_save='100N_4-10-21';
 % load_info.name_save='200N_4-7-21';
 end
@@ -45,12 +45,12 @@ FDD_info_analyze=FDD_info_analyze(1:12:end,:); %change sampling rate
 
 %% normalize data
 %need to run this on matlab 2018 or recent
-X=normc(FDD_info_analyze);
-% X=normalize(FDD_info_analyze);
+% X=normc(FDD_info_analyze);
+X=normalize(FDD_info_analyze);
 
 %% RPCA, PCA
 [L_O,S_O]=RPCA(X);
-[V,Score,lmd]=pca(L_O);
+[V,Score,lmd]=pca(L_O,'Centered',true);
 
 var_PCA=[];
 for j=1:length(lmd)
@@ -64,6 +64,11 @@ var_PCA=var_PCA./sum(lmd);
 
 
 fprintf('PCA calc done') ;
+%%
+data=X;
+mean_data=mean(data);
+center_data=data-repmat(mean_data,[size(data,1) 1]);
+FullData=center_data*V;
 
 %% plot
 fprintf('\n starting plot') ;
@@ -74,6 +79,7 @@ plotInfo.escapeTime=0; %plot wrt escape time (# of steps before failure)
 plotInfo.ramp=1; %plot wrt time
 plotInfo.digit=digit;
 plotInfo.fivelink=fivelink;
+plotInfo.FullData=FullData;
 if plotInfo.ramp
     if fivelink
     colorNum=9;
@@ -94,7 +100,8 @@ plotInfo.V=V;
 plotInfo.axisVec=axisVec;
 % plotInfo.titlePlot='All RPCA-PCA(L)-X';
 plotInfo.titlePlot='DIGIT All RPCA-PCA(L)-X-ExtForce(100N)';
-FullData=plot.plotPCA(plotInfo);
+
+plot.plotPCA(plotInfo);
 %%
 if plot_LminusS
     escapeTime=1;
