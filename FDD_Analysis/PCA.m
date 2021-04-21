@@ -27,7 +27,7 @@ elseif digit_rob
     load_info.stand=1;
     load_info.allFeat=0;
     load_info.compileFDD_Data=0;
-    load_info.forceAxis='x';
+    load_info.forceAxis='y';
     load_info.name_save='100N_4-10-21';
 % load_info.name_save='200N_4-7-21';
 end
@@ -36,7 +36,7 @@ end
 FDD_info=data_info.FDD_info;
 FDD_info_analyze=data_info.FDD_info_analyze;
 feat=data_info.feat_f;
-feet_info=data_info.feet_info; %[LF_x,LF_y,LF_z,LF_r,LF_p,LF_y,LF_x,RF_y,RF_z,RF_r,RF_p,RF_y]
+feet_info=data_info.feet_info; %[p_LF_f',rpy_LF_f',p_RF_f,rpy_RF_f']
 
 %% only keep the part where the biped controller was running
  a=FDD_info(:,end)-3;
@@ -50,7 +50,9 @@ FDD_info_analyze=FDD_info_analyze(1:12:end,:); %change sampling rate
 feet_info=feet_info(1:12:end,:); %change sampling rate
 %% figuring out where feet roll/pitch
 figure
-plot(FDD_info(:,end),rad2deg(feet_info(:,5)))
+plot(FDD_info(:,end),rad2deg(feet_info(:,3)))
+hold on
+plot(FDD_info(:,end),rad2deg(feet_info(:,6)))
 %% RUNNING PCA
 %% normalize data
 %need to run this on matlab 2018 or recent
@@ -86,14 +88,15 @@ plotInfo.X=X;
 plotInfo.PCA_info_full=FDD_info;
 plotInfo.escapeTime=0; %plot wrt escape time (# of steps before failure)
 plotInfo.ramp=1; %plot wrt time
-plotInfo.digit=digit;
+plotInfo.digit=digit_rob;
 plotInfo.fivelink=fivelink;
 plotInfo.FullData=FullData;
+
 if plotInfo.ramp
     if fivelink
     colorNum=9;
     axisVec=[0 round(FDD_info(end,end-1))];
-    elseif digit
+    elseif digit_rob
         colorNum=fix(FDD_info(end,end))+1;
     axisVec=[0 fix(FDD_info(end,end))];
     end
@@ -108,7 +111,7 @@ plotInfo.colorNum=colorNum;
 plotInfo.V=V;
 plotInfo.axisVec=axisVec;
 % plotInfo.titlePlot='All RPCA-PCA(L)-X';
-plotInfo.titlePlot='DIGIT All RPCA-PCA(L)-X-ExtForce(100N)';
+plotInfo.titlePlot='DIGIT All RPCA-PCA(L)-Y-ExtForce(100N)';
 
 plot.plotPCA(plotInfo);
 %%
