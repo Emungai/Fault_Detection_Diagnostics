@@ -44,7 +44,11 @@ plot_pca=0
 forceAxis="x"
 #loading data
 #see https://docs.scipy.org/doc/scipy/reference/tutorial/io.html for reference
-mat=spio.loadmat('/home/exo/Documents/eva/Fault_Detection_Diagnostics/FDD_Analysis/data/digit/Biped_Controller/x_force_act_moment/100N_4-10-21.mat', struct_as_record=False, squeeze_me=True)
+if forceAxis == "y":
+    mat=spio.loadmat('/home/exo/Documents/eva/Fault_Detection_Diagnostics/FDD_Analysis/data/digit/Biped_Controller/y_force_act_moment/100N_4-10-21.mat', struct_as_record=False, squeeze_me=True)
+elif forceAxis == "x":
+    mat=spio.loadmat('/home/exo/Documents/eva/Fault_Detection_Diagnostics/FDD_Analysis/data/digit/Biped_Controller/x_force_act_moment/100N_4-10-21.mat', struct_as_record=False, squeeze_me=True)
+
 logger=mat['logger']
 q_all=logger.q_all
 dq_all=logger.dq_all
@@ -257,7 +261,10 @@ else:
 
 if affinity_propagation_info:
     S=sim_matrix(Y)
-    pref=S.min()
+    np.fill_diagonal(S,S.min())
+    pref=S.min()-200
+    # pref=np.median(np.sort(S,axis=None))+100
+    # pref=-1000
     # affinity_propagation = cluster.AffinityPropagation(
     #     damping=0.75, preference=int(pref), max_iter=1000,verbose=True).fit(Y)
     # labels = db.labels_
@@ -286,9 +293,20 @@ default_base = {
                 'preference': int(pref),
                 'n_neighbors': 2,
                 'n_clusters': 3,
-                'min_samples': 200,
-                'xi': 0.05,
-                'min_cluster_size': 0.3}
+                'min_samples': 20,
+                'xi': 0.25,
+                'min_cluster_size': 0.1}
+
+# default_base = {
+#                 # 'quantile': .3,
+#                 'eps': eps_db,
+#                 'damping': .85,
+#                 'preference': int(pref),
+#                 'n_neighbors': 2,
+#                 'n_clusters': 3,
+#                 'min_samples': 20,
+#                 'xi': 0.25,
+#                 'min_cluster_size': 0.1}
 params = default_base.copy()
 
 # # estimate bandwidth for mean shift
@@ -304,13 +322,20 @@ connectivity = 0.5 * (connectivity + connectivity.T)
 ward = cluster.AgglomerativeClustering(
         n_clusters=params['n_clusters'], linkage='ward',
         connectivity=connectivity)
-spectral = cluster.SpectralClustering(
-    n_clusters=params['n_clusters'], eigen_solver='arpack',
-    affinity="nearest_neighbors")
+if forceAxis == "x":        
+    spectral = cluster.SpectralClustering(
+        n_clusters=params['n_clusters'], eigen_solver='arpack',
+        affinity="nearest_neighbors")
+elif forceAxis == "y":
+    spectral = cluster.SpectralClustering(
+        n_clusters=3, eigen_solver='arpack',
+        affinity="rbf")
 
+# optics = cluster.OPTICS(min_samples=params['min_samples'],
+#                         xi=params['xi'],
+#                         min_cluster_size=params['min_cluster_size'])
 optics = cluster.OPTICS(min_samples=params['min_samples'],
-                        xi=params['xi'],
-                        min_cluster_size=params['min_cluster_size'])
+                        xi=params['xi'])
 
 
 dbscan = cluster.DBSCAN(eps=params['eps'],min_samples=params['min_samples'])
@@ -320,6 +345,8 @@ birch = cluster.Birch(n_clusters=params['n_clusters'])
 affinity_propagation = cluster.AffinityPropagation(
         damping=params['damping'], preference=params['preference'],max_iter=1000,verbose=True)
 
+# affinity_propagation = cluster.AffinityPropagation(
+#         damping=params['damping'],max_iter=1000,verbose=True)
 
 
 clustering_algorithms = (
@@ -330,7 +357,9 @@ clustering_algorithms = (
     ('OPTICS', optics),
     ('Birch', birch)
 )
-
+# clustering_algorithms = (
+#      ('AffinityPropagation', affinity_propagation),
+# )
 
 for name, algorithm in clustering_algorithms:
     t0 = time.time()
@@ -393,7 +422,7 @@ for name, algorithm in clustering_algorithms:
     ax.set_ylabel('V2')
     ax.set_zlabel('V3')
     ax.set_title(name+"\n Clusters:"+ str(n_clusters_)+ " Noise Pts: "+ str(n_noise_)+ "\n Silhoutte:" + str(metrics.silhouette_score(Y, labels)),wrap=True)
-
+    # ax.set_title(name+"\n Clusters:"+ str(n_clusters_)+ " Noise Pts: "+ str(n_noise_),wrap=True)
     ax1.scatter(x, y, s=10, color=colors[y_pred])
     ax1.set_xlabel('V1')
     ax1.set_ylabel('V2')
