@@ -8,7 +8,7 @@ addpath('C:\Users\mungam\Documents\School\softwareTools\libsvm\libsvm-3.24\matla
 %% setting up variables
 %loading data
 fivelink=0;
-digit=1;
+digit_rob=1;
 noise=0; %use noisy data
 
 %plot
@@ -16,13 +16,13 @@ plot_LminusS=1; %set to 1 if you want to plot L minus S
 
 %% loading Data if necessary
 load_info.fivelink=fivelink;
-load_info.digit=digit;
+load_info.digit=digit_rob;
 load_info.noise=noise;
 load_info.saveData=1;
 if fivelink
     load_info.walk=1;
     load_info.stand=0;
-elseif digit
+elseif digit_rob
     load_info.walk=0;
     load_info.stand=1;
     load_info.allFeat=0;
@@ -32,17 +32,26 @@ elseif digit
 % load_info.name_save='200N_4-7-21';
 end
 
-[FDD_info, FDD_info_analyze,feat]=utils.load_data(load_info);
+[data_info]=utils.load_data(load_info);
+FDD_info=data_info.FDD_info;
+FDD_info_analyze=data_info.FDD_info_analyze;
+feat=data_info.feat_f;
+feet_info=data_info.feet_info; %[LF_x,LF_y,LF_z,LF_r,LF_p,LF_y,LF_x,RF_y,RF_z,RF_r,RF_p,RF_y]
 
 %% only keep the part where the biped controller was running
  a=FDD_info(:,end)-3;
  [r,c]=find(a <0);
  FDD_info=FDD_info(r(end)+1:length(FDD_info),:);
-  FDD_info_analyze=FDD_info_analyze(r(end)+1:length(FDD_info_analyze),:);
+ FDD_info_analyze=FDD_info_analyze(r(end)+1:length(FDD_info_analyze),:);
+ feet_info=feet_info(r(end)+1:length(feet_info),:);
 %% get different sample rate
 FDD_info=FDD_info(1:12:end,:); %change sampling rate
 FDD_info_analyze=FDD_info_analyze(1:12:end,:); %change sampling rate
-
+feet_info=feet_info(1:12:end,:); %change sampling rate
+%% figuring out where feet roll/pitch
+figure
+plot(FDD_info(:,end),rad2deg(feet_info(:,5)))
+%% RUNNING PCA
 %% normalize data
 %need to run this on matlab 2018 or recent
 % X=normc(FDD_info_analyze);

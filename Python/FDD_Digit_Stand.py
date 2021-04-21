@@ -44,7 +44,7 @@ plot_pca=0
 forceAxis="x"
 #loading data
 #see https://docs.scipy.org/doc/scipy/reference/tutorial/io.html for reference
-mat=spio.loadmat('/home/exo/Documents/eva/Fault_Detection_Diagnostics/FDD_Analysis/data/digit/Biped_Controller/x_force/100N_4-10-21.mat', struct_as_record=False, squeeze_me=True)
+mat=spio.loadmat('/home/exo/Documents/eva/Fault_Detection_Diagnostics/FDD_Analysis/data/digit/Biped_Controller/x_force_act_moment/100N_4-10-21.mat', struct_as_record=False, squeeze_me=True)
 logger=mat['logger']
 q_all=logger.q_all
 dq_all=logger.dq_all
@@ -57,6 +57,8 @@ rp_COMFoot=logger.rp_COMFoot
 task=logger.task
 time_data=logger.time
 feat=logger.feat_names
+rpy_LeftFoot=logger.rpy_LeftFoot
+rpy_RightFoot=logger.rpy_RightFoot
 
 if forceAxis == "y":
     q_idx=np.array([2,3,6,7,11,13,14,18,22,24,25])-1
@@ -78,7 +80,8 @@ LG_all_f=np.array(LG[L_idx,])
 L_LeftFoot_f=np.array(L_LeftFoot[L_idx,])
 L_RightFoot_f=np.array(L_RightFoot[L_idx,])
 rp_COMFoot_f=np.array(rp_COMFoot[p_idx,])
-
+rpy_LeftFoot_f=np.rad2deg(np.array(rpy_LeftFoot[L_idx,]))
+rpy_RightFoot_f=np.rad2deg(np.array(rpy_RightFoot[L_idx,]))
 
 # FDD = np.row_stack((q_all_f, dq_all_f,ua_all_f-ud_all_f,LG_all_f,L_LeftFoot_f,L_RightFoot_f,rp_COMFoot_f))
 FDD = np.row_stack((q_all_f, dq_all_f,LG_all_f,L_LeftFoot_f,L_RightFoot_f,rp_COMFoot_f))
@@ -90,6 +93,8 @@ idx_bc=np.where(t<0)
 idx_end=len(t)
 FDD_bc=FDD[idx_bc[0][-1]:idx_end,]
 time_data=time_data[idx_bc[0][-1]:idx_end]
+rpy_LeftFoot_f=rpy_LeftFoot_f[idx_bc[0][-1]:idx_end]
+rpy_RightFoot_f=rpy_RightFoot_f[idx_bc[0][-1]:idx_end]
 
 # #cutting off the part where robot falls 
 # t=np.array(time_data)-10.1
@@ -102,6 +107,8 @@ if diff_sampleRate:
 
     FDD_bc=FDD_bc[0::12,:] #to grab everyother column Y[:,0::2]
     time_data=time_data[0::12]
+    rpy_LeftFoot_f=rpy_LeftFoot_f[0::12]
+    rpy_RightFoot_f=rpy_RightFoot_f[0::12]
 
  # normalize dataset for easier parameter selection
 FDD_bc_s = StandardScaler().fit_transform(FDD_bc) #to see whether there's a nan element np.any(np.isnan(mat))
