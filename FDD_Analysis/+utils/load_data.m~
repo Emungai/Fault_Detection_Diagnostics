@@ -1,4 +1,4 @@
-function [FDD_info,FDD_info_analyze,feat_f]= load_data(info)
+function [data_info]= load_data(info)
 fivelink=info.fivelink;
 digit=info.digit;
 noise=info.noise;
@@ -66,11 +66,11 @@ elseif digit
     if stand
         if strcmp(forceAxis,'y')
             data_name=['log_ctrl_y_', name_save,'.txt'];
-            save_dir=fullfile(cur,'/data/digit/Biped_Controller/y_force');
+            save_dir=fullfile(cur,'/data/digit/Biped_Controller/y_force_act_moment');
             
         elseif strcmp(forceAxis,'x')
             data_name=['log_ctrl_x_', name_save,'.txt'];
-            save_dir=fullfile(cur,'/data/digit/Biped_Controller/x_force');
+            save_dir=fullfile(cur,'/data/digit/Biped_Controller/x_force_act_moment');
         end
         if compileFDD_Data
             
@@ -107,7 +107,9 @@ elseif digit
         p_RF=logger.p_RightFoot;
         rpy_LF=logger.rpy_LeftFoot;
         rpy_RF=logger.rpy_RightFoot;
- 
+        rpy_b_LF=logger.rpy_b_LeftFoot;
+        rpy_b_RF=logger.rpy_b_RightFoot;
+        p_com=logger.p_
         
         for i=1:length(feat)
             
@@ -127,10 +129,10 @@ elseif digit
             L_LeftFoot_f=L_LeftFoot(L_idx,:);
             L_RightFoot_f=L_RightFoot(L_idx,:);
             rp_COMFoot_f=rp_COMFoot(p_idx,:);
-            p_LF_f=p_LF(L_idx,:);
-            p_RF_f=p_RF(2,:);
-            rpy_LF_f=rpy_LF(2,:);
-            rpy_RF_f=rpy_RF(2,:);
+            p_LF_f=p_LF(p_idx,:);
+            p_RF_f=p_RF(p_idx,:);
+            rpy_LF_f=rpy_LF(L_idx,:);
+            rpy_RF_f=rpy_RF(L_idx,:);
             
             
             
@@ -147,10 +149,10 @@ elseif digit
             L_LeftFoot_f=L_LeftFoot(L_idx,:);
             L_RightFoot_f=L_RightFoot(L_idx,:);
             rp_COMFoot_f=rp_COMFoot(p_idx,:);
-            p_LF_f=p_LF(2,:);
-            p_RF_f=p_RF(2,:);
-            rpy_LF_f=rpy_LF(2,:);
-            rpy_RF_f=rpy_RF(2,:);
+            p_LF_f=p_LF(p_idx,:);
+            p_RF_f=p_RF(p_idx,:);
+            rpy_LF_f=rpy_LF(L_idx,:);
+            rpy_RF_f=rpy_RF(L_idx,:);
             
         else
             q_idx=length(feat{1});
@@ -164,6 +166,10 @@ elseif digit
             L_LeftFoot_f=L_LeftFoot;
             L_RightFoot_f=L_RightFoot;
             rp_COMFoot_f=rp_COMFoot;
+            p_LF_f=p_LF;
+            p_RF_f=p_RF;
+            rpy_LF_f=rpy_LF;
+            rpy_RF_f=rpy_RF;
             
             
         end
@@ -172,7 +178,13 @@ elseif digit
         
         FDD_info_analyze=FDD_info(:,1:end-2);
         feat_f=[feat{1}(q_idx), feat{2}(q_idx), feat{3}(u_idx),feat{4}(L_idx),feat{5}(L_idx),feat{6}(L_idx),feat{7}(p_idx),feat{8},feat{9}];
-        
+        feet_info=[p_LF_f',p_RF_f',rpy_LF_f',rpy_RF_f'];
+        data_info.FDD_info=FDD_info;
+        data_info.FDD_info_analyze=FDD_info_analyze;
+        data_info.feat_f=feat_f;
+        data_info.feet_info=feet_info;
+        data_info.p_com=p_com;
+        data_info.p_linkz=p_link;
         
     end
 else

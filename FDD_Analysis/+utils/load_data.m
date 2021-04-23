@@ -109,7 +109,8 @@ elseif digit
         rpy_RF=logger.rpy_RightFoot;
         rpy_b_LF=logger.rpy_b_LeftFoot;
         rpy_b_RF=logger.rpy_b_RightFoot;
- 
+        p_com=logger.p_com;
+        p_links=logger.p_links;
         
         for i=1:length(feat)
             
@@ -183,6 +184,8 @@ elseif digit
         data_info.FDD_info_analyze=FDD_info_analyze;
         data_info.feat_f=feat_f;
         data_info.feet_info=feet_info;
+        data_info.p_com=p_com;
+        data_info.p_links=p_links;
         
     end
 else

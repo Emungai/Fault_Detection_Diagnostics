@@ -49,50 +49,55 @@ for i=1:size(q_all,2)
     Jp_com = Jp_COM(q);
     dJp_com = dJp_COM(q,dq);
     v_com(:,i) = Jp_com*dq;
+    
     %right foot
     p_RF(:,i) = p_RightFoot(q);
     Jp_RF= Jp_RightFoot(q);
     dJp_RF= dJp_RightFoot(q,dq);
     v_RF(:,i) = Jp_RF*dq;
+    rpy_RF(:,i)=rpy_RightFoot(q);
+    rpy_b_RF(:,i)=rpyb_RightFoot(q);
     
+    %Right Toe
     p_RT(:,i) = p_RightToe(q);
     Jp_RT= Jp_RightToe(q);
     dJp_RT = dJp_RightToe(q,dq);
     v_RT(:,i) = Jp_RT*dq;
+    rpy_RT(:,i)=rpy_RightToe(q);
+    rpy_b_RT(:,i)=rpyb_RightToe(q);
     
+    %Right Heel
     p_RH(:,i) = p_RightHeel(q);
     Jp_RH= Jp_RightHeel(q);
     dJp_RH = dJp_RightHeel(q,dq);
     v_RH(:,i) = Jp_RH*dq;
+    rpy_RH(:,i)=rpy_RightHeel(q);
+    rpy_b_RH(:,i)=rpyb_RightHeel(q);
+    
     %left foot
     p_LF(:,i) = p_LeftFoot(q);
     Jp_LF = Jp_LeftFoot(q);
     dJp_LF = dJp_LeftFoot(q,dq);
     v_LF(:,i) = Jp_LF*dq;
+    rpy_LF(:,i)=rpy_LeftFoot(q);
+    rpy_b_LF(:,i)=rpyb_LeftFoot(q);
     
+    %left Toe
     p_LT(:,i) = p_LeftToe(q);
     Jp_LT = Jp_LeftToe(q);
     dJp_LT = dJp_LeftToe(q,dq);
     v_LT(:,i) = Jp_LT*dq;
+    rpy_LT(:,i)=rpy_LeftToe(q);
+    rpy_b_LT(:,i)=rpyb_LeftToe(q);
     
+    %left Heel
     p_LH(:,i) = p_LeftHeel(q);
     Jp_LH = Jp_LeftHeel(q);
     dJp_LH = dJp_LeftHeel(q,dq);
     v_LH(:,i) = Jp_LH*dq;
-    
-    rpy_LF(:,i)=rpy_LeftFoot(q);
-    rpy_RF(:,i)=rpy_RightFoot(q);
     rpy_LH(:,i)=rpy_LeftHeel(q);
-    rpy_RH(:,i)=rpy_RightHeel(q);
-    rpy_LT(:,i)=rpy_LeftToe(q);
-    rpy_RT(:,i)=rpy_RightToe(q);
-    
-    rpy_b_LF(:,i)=rpyb_LeftFoot(q);
-    rpy_b_RF(:,i)=rpyb_RightFoot(q);
     rpy_b_LH(:,i)=rpyb_LeftHeel(q);
-    rpy_b_RH(:,i)=rpyb_RightHeel(q);
-    rpy_b_LT(:,i)=rpyb_LeftToe(q);
-    rpy_b_RT(:,i)=rpyb_RightToe(q);
+    
     
     %Angular momentum about the CoM
     LG(:,i)=getDigitAngularMomentum(p_com(:,i),[q;dq]);
@@ -102,6 +107,56 @@ for i=1:size(q_all,2)
     
     %Relative Height of the CoM w.r.t legs
     rp_COMFoot(:,i)=p_com(:,i)-0.5*(p_LF(:,i)-p_RF(:,i));
+    
+    %Position of the links
+    P_torso=p_TorsoLink(q);
+    P_leftHipRoll=p_LeftHipRollLink(q);
+    P_leftHipYaw = p_leftHipYawLink(q);
+    P_leftHipPitch = p_LeftHipPitchLink(q);
+    P_leftKnee = p_LeftKneeLink(q);
+    P_leftTarsus = p_LeftTarsusLink(q);
+    P_leftToePitch = p_LeftToePitchLink(q);
+    P_leftToeRoll = p_LeftToeRollLink(q);
+    P_leftShoulderRoll = p_LeftShoulderRollLink(q);
+    P_leftShoulderPitch = p_LeftShoulderPitchLink(q);
+    P_leftShoulderYaw = p_LeftShoulderYawLink(q);
+    P_leftElbow = p_LeftElbowLink(q);
+    P_rightHipRoll = p_RightHipRollLink(q);
+    P_rightHipYaw = p_RightHipYawLink(q);
+    P_rightHipPitch = p_RightHipPitchLink(q);
+    P_rightKnee = p_RightKneeLink(q);
+    P_rightTarsus = p_RightTarsusLink(q);
+    P_rightToePitch = p_RightToePitchLink(q);
+    P_rightToeRoll = p_RightToeRollLink(q);
+    P_rightShoulderRoll = p_RightShoulderRollLink(q);
+    P_rightShoulderPitch = p_RightShoulderPitchLink(q);
+    P_rightShoulderYaw = p_RightShoulderYawLink(q);
+    P_rightElbow = p_RightElbowLink(q);
+    
+    %Saving the z position of links
+    p_links(:,i)=[P_torso(3);...
+                  P_leftHipRoll(3);...
+                  P_leftHipYaw(3);...
+                  P_leftHipPitch(3);...
+                  P_leftKnee(3);...
+                  P_leftTarsus(3);...
+                  P_leftToePitch(3);...
+                  P_leftToeRoll(3);...
+                  P_leftShoulderRoll(3);...
+                  P_leftShoulderPitch(3);...
+                  P_leftShoulderYaw(3);...
+                  P_leftElbow(3);...
+                  P_rightHipRoll(3);...
+                  P_rightHipYaw(3);...
+                  P_rightHipPitch(3);...
+                  P_rightKnee(3);...
+                  P_rightTarsus(3);...
+                  P_rightToePitch(3);...
+                  P_rightToeRoll(3);...
+                  P_rightShoulderRoll(3);...
+                  P_rightShoulderPitch(3);...
+                  P_rightShoulderYaw(3);...
+                  P_rightElbow(3)];
 end
 display('Calculations done ...');
 %% putting data for FDD
@@ -150,6 +205,8 @@ logger.time=t;
 logger.feat_names=feat;
 logger.p_LeftFoot=p_LF;
 logger.p_RightFoot=p_RF;
+logger.p_links=p_links;
+logger.p_com=p_com;
 logger.rpy_LeftFoot=rpy_LF;
 logger.rpy_RightFoot=rpy_RF;
 logger.rpy_b_RightFoot=rpy_b_RF;

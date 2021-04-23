@@ -35,13 +35,13 @@ from similarity_mat import sim_matrix
 #### set variables
 jet_cl=1
 diff_sampleRate=1
-plot_pca=0
+plot_pca=1
 min_point=200
 affinity_propagation_info=1
 DBSCAN_info=0
-plot_pca=0
+plot_pca=1
 
-forceAxis="x"
+forceAxis="y"
 #loading data
 #see https://docs.scipy.org/doc/scipy/reference/tutorial/io.html for reference
 if forceAxis == "y":
