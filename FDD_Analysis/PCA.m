@@ -37,6 +37,7 @@ FDD_info=data_info.FDD_info;
 FDD_info_analyze=data_info.FDD_info_analyze;
 feat=data_info.feat_f;
 feet_info=data_info.feet_info; %[p_LF_f',rpy_LF_f',p_RF_f,rpy_RF_f']
+p_links=data_info.p_links';
 
 %% only keep the part where the biped controller was running
 a=FDD_info(:,end)-3;
@@ -44,10 +45,32 @@ a=FDD_info(:,end)-3;
 FDD_info=FDD_info(r(end)+1:length(FDD_info),:);
 FDD_info_analyze=FDD_info_analyze(r(end)+1:length(FDD_info_analyze),:);
 feet_info=feet_info(r(end)+1:length(feet_info),:);
+p_links=p_links(r(end)+1:length(p_links),:);
 %% get different sample rate
 FDD_info=FDD_info(1:12:end,:); %change sampling rate
 FDD_info_analyze=FDD_info_analyze(1:12:end,:); %change sampling rate
 feet_info=feet_info(1:12:end,:); %change sampling rate
+p_links=p_links(1:12:end,:); %change sampling rate
+%% figuring out when robot has started to fall, and fallen and creating label for classification
+label=zeros(length(FDD_info_analyze),1);
+
+%robot starting to fall
+feet_info_r=rad2deg(feet_info(:,[3,6])); %getting just the pitch or roll of the feet
+feet_info_rb=30-abs(feet_info_r); %arbitrarily set 30 degs as the threshold for when robot is standing
+[r_falling,c]=find(sum(feet_info_rb<0,2)>0);
+
+label([r_falling(1):length(label)],:)=1;
+
+%when robot has fallen
+p_linksSansToes=p_links; p_linksSansToes(:,[7,8,18,19])=[];
+%initial z positions for: left foot, right foot,left toe pitch link, left toe roll link, right toe pitch link, right toe roll link
+p_feet=[feet_info(1,2),feet_info(1,5),p_links(1,7),p_links(1,8),p_links(1,18),p_links(1,19)];
+p_feet_zmax=max(p_feet);
+p_linksSansToesb=p_linksSansToes-p_feet_zmax;
+find(sum(p_linksSansToesb<0,2)>0)
+[r_fallen,c]=find(p_linksSansToesb <0);
+
+label([r_fall(1):length(label)],:)=2;
 
 
 %% RUNNING PCA
@@ -55,7 +78,7 @@ feet_info=feet_info(1:12:end,:); %change sampling rate
 %need to run this on matlab 2018 or recent
 % X=normc(FDD_info_analyze);
 X=normalize(FDD_info_analyze);
-
+time=FDD_info(:,end);
 %% RPCA, PCA
 [L_O,S_O]=RPCA(X);
 [V,Score,lmd]=pca(L_O,'Centered',true);
@@ -84,6 +107,12 @@ figure
 plot(FDD_info(:,end),rad2deg(feet_info(:,3)),'o','LineWidth',2)
 hold on
 plot(FDD_info(:,end),rad2deg(feet_info(:,6)),'x','LineWidth',2)
+hold on
+plot(FDD_info(:,end),label,'Color','k','LineWidth',2)
+hold on
+xline(FDD_info(r_falling(1),end))
+hold on
+xline(FDD_info(r_fall(1),end))
 title([load_info.forceAxis,' ',newChr])
 xlabel('time (s)')
 if strcmp(load_info.forceAxis,'y')

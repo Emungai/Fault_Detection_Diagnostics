@@ -179,7 +179,7 @@ elseif digit
         
         FDD_info_analyze=FDD_info(:,1:end-2);
         feat_f=[feat{1}(q_idx), feat{2}(q_idx), feat{3}(u_idx),feat{4}(L_idx),feat{5}(L_idx),feat{6}(L_idx),feat{7}(p_idx),feat{8},feat{9}];
-        feet_info=[p_LF_f',p_RF_f',rpy_LF_f',rpy_RF_f'];
+        feet_info=[p_LF_f',rpy_LF_f',p_RF_f',rpy_RF_f'];
         data_info.FDD_info=FDD_info;
         data_info.FDD_info_analyze=FDD_info_analyze;
         data_info.feat_f=feat_f;
