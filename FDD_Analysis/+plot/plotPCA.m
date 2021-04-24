@@ -25,37 +25,42 @@ beg=1;
 
 if ramp
     if fivelink
-    prev=round(PCA_info_full(beg,end-1));
+        prev=round(PCA_info_full(beg,end-1));
     elseif digit
-         prev=fix(PCA_info_full(beg,end));
+        prev=fix(PCA_info_full(beg,end));
     end
-    %     jetcustom = jet(9);
+    
 elseif escapeTime
-    prev=PCA_info_full(1,end-2);
-    %     jetcustom = jet(PCA_info_full(1,end-2)+1);
+    if fivelink
+        prev=PCA_info_full(1,end-2);
+    elseif digit
+        prev=PCA_info_full(1,end);
+    end
+    
 else
     prev=PCA_info_full(1,end);
-    % jetcustom = jet(7);
+    
 end
 jetcustom = jet(colorNum);
 for i=1:size(FullData,1)
-%     x = V(:,1)'*obs(i,:)';
-%     y = V(:,2)'*obs(i,:)';
-%     z = V(:,3)'*obs(i,:)';
-%     r= V(:,4)'*obs(i,:)';
-      x=FullData(i,1);
-      y=FullData(i,2);
-      z=FullData(i,3);
+    
+    x=FullData(i,1);
+    y=FullData(i,2);
+    z=FullData(i,3);
     if ramp
         
         %             comp=round(PCA_info_full(i,end-1));
         if fivelink
-        comp = fix(PCA_info_full(i,end-1)); %just saves the non-decimal part of the number
+            comp = fix(PCA_info_full(i,end-1)); %just saves the non-decimal part of the number
         elseif digit
             comp = fix(PCA_info_full(i,end)); %just saves the non-decimal part of the number
         end
-        elseif escapeTime
-        comp=PCA_info_full(i,end-2);
+    elseif escapeTime
+        if fivelink
+            comp=PCA_info_full(i,end-2);
+        elseif digit
+            comp=PCA_info_full(i,end);
+        end
     else
         comp=PCA_info_full(i,end);
     end
@@ -71,13 +76,13 @@ for i=1:size(FullData,1)
     %         plot3(x,y,z,'rx','LineWidth',2);
     % plot(x,y,'x','Color', jetcustom(k,:),'LineWidth',2)
     
-%     FullData(i,:)=[x,y,z,r];
+    %     FullData(i,:)=[x,y,z,r];
 end
 % end
 colormap(jetcustom);
 cb = colorbar;
 if ramp
-%     caxis([0 8])
+    %     caxis([0 8])
     ylabel(cb,'time ')
 elseif escapeTime
     %     caxis([-PCA_info_full(1,end-2) 0])

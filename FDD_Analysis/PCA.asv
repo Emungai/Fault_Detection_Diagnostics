@@ -66,9 +66,9 @@ p_linksSansToes=p_links; p_linksSansToes(:,[7,8,18,19])=[];
 %initial z positions for: left foot, right foot,left toe pitch link, left toe roll link, right toe pitch link, right toe roll link
 p_feet=[feet_info(1,2),feet_info(1,5),p_links(1,7),p_links(1,8),p_links(1,18),p_links(1,19)];
 p_feet_zmax=max(p_feet);
-p_linksSansToesb=p_linksSansToes-p_feet_zmax-0.1;
-[r_fallen,c]=find(sum(p_linksSansToesb<0,2)>0);
-
+p_linksSansToesb=p_linksSansToes-p_feet_zmax;
+[r_fallen,c]=find(sum(p_linksSansToesb<0,2)>0)
+=find(p_linksSansToesb <0);
 
 label([r_fallen(1):length(label)],:)=2;
 
