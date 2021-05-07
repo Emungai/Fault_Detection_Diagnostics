@@ -13,8 +13,9 @@ def RPCA(X):
     n1,n2 = X.shape
     mu = n1*n2/(4*np.sum(np.abs(X.reshape(-1))))
     lambd = 1/np.sqrt(np.maximum(n1,n2))
-    thresh = 10**(-7) * np.linalg.norm(X)
-    
+    # thresh = 10**(-7) * np.linalg.norm(X)
+    thresh = 10**(-4) * np.linalg.norm(X)
+
     S = np.zeros_like(X)
     Y = np.zeros_like(X)
     L = np.zeros_like(X)
@@ -24,7 +25,7 @@ def RPCA(X):
         S = shrink(X-L+(1/mu)*Y,lambd/mu)
         Y = Y + mu*(X-L-S)
         count += 1
-        print("count=%d" %count)
-        thresh_new=np.linalg.norm(X-L-S)
-        print("thresh=%f"%thresh_new)
+        # print("count=%d" %count)
+        # thresh_new=np.linalg.norm(X-L-S)
+        # print("thresh=%f"%thresh_new)
     return L,S

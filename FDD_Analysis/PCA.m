@@ -17,7 +17,7 @@ plot_LminusS=1; %set to 1 if you want to plot L minus S
 %% loading Data if necessary
 load_info.fivelink=fivelink;
 load_info.digit=digit_rob;
-load_info.noise=noise;
+load_info.noise=noise
 load_info.saveData=1;
 if fivelink
     load_info.walk=1;
@@ -25,11 +25,14 @@ if fivelink
 elseif digit_rob
     load_info.walk=0;
     load_info.stand=1;
-    load_info.allFeat=0;
+    load_info.allFeat=1;
     load_info.compileFDD_Data=0;
     load_info.forceAxis='x';
-    load_info.name_save='100N_4-10-21';
-    % load_info.name_save='200N_4-7-21';
+    load_info.name_data='100N_4-10-21';
+%     load_info.name_data='-100N_4-25-21';
+    load_info.name_data='100N_noise_5-6-21';
+     load_info.name_data='70N_5-6-21';
+    load_info.name_save=load_info.name_data;
 end
 
 [data_info]=utils.load_data(load_info);
@@ -57,8 +60,11 @@ label=zeros(length(FDD_info_analyze),1);
 %robot starting to fall
 feet_info_r=rad2deg(feet_info(:,[3,6])); %getting just the pitch or roll of the feet
 feet_info_rb=30-abs(feet_info_r); %arbitrarily set 30 degs as the threshold for when robot is standing
+%first figuring out where feet_info_rb is negaitve since that's where the feet angles are greater than zero
+%we do this using feet_info_rb<0 which returns a Boolean (note it'll return true when the feet angles are greater than 30)
+%we then sum the rows of this Boolean, if the feet angles are greater than
+%zero, the summation will be greater than 0
 [r_falling,c]=find(sum(feet_info_rb<0,2)>0);
-
 label([r_falling(1):length(label)],:)=1;
 
 %when robot has fallen
@@ -81,8 +87,13 @@ label([r_fallen(1):length(label)],:)=2;
 X=normalize(FDD_info_analyze);
 time=FDD_info(:,end);
 FDD_info(:,end+1)=label;
+
 %% RPCA, PCA
+% tic
+% [L_O,S_O]=RPCA(X(1:600,:));
+% toc
 [L_O,S_O]=RPCA(X);
+%%
 [V,Score,lmd]=pca(L_O,'Centered',true);
 
 var_PCA=[];
@@ -156,7 +167,13 @@ end
 %% plot
 fprintf('\n starting plot') ;
 %plotting variables
-
+plotInfo.X=X;
+plotInfo.PCA_info_full=FDD_info;
+plotInfo.escapeTime=1; %plot wrt escape time (# of steps before failure)
+plotInfo.ramp=0; %plot wrt time
+plotInfo.digit=digit_rob;
+plotInfo.fivelink=fivelink;
+plotInfo.FullData=FullData;
 
 if plotInfo.ramp
     if fivelink
@@ -168,8 +185,8 @@ if plotInfo.ramp
     end
 elseif plotInfo.escapeTime
     if fivelink
-    colorNum=FDD_info(1,end-2)+1;
-    axisVec=[-FDD_info(1,end-2) 0];
+        colorNum=FDD_info(1,end-2)+1;
+        axisVec=[-FDD_info(1,end-2) 0];
     elseif digit_rob
         colorNum=label(end)+1;
         axisVec=[label(1) label(end)];
@@ -179,13 +196,7 @@ else
     axisVec=[1 k];
 end
 
-plotInfo.X=X;
-plotInfo.PCA_info_full=FDD_info;
-plotInfo.escapeTime=1; %plot wrt escape time (# of steps before failure)
-plotInfo.ramp=0; %plot wrt time
-plotInfo.digit=digit_rob;
-plotInfo.fivelink=fivelink;
-plotInfo.FullData=FullData;
+
 plotInfo.colorNum=colorNum;
 plotInfo.V=V;
 plotInfo.axisVec=axisVec;

@@ -6,6 +6,7 @@ walk=info.walk;
 stand=info.stand;
 saveData=info.saveData
 name_save=info.name_save;
+name_data=info.name_data;
 forceAxis=info.forceAxis;
 if digit
     allFeat=info.allFeat;
@@ -65,11 +66,11 @@ elseif digit
     data_dir='../../Digit_Controller/version/release_2021.02.11/fdd/log_ctrl/Biped_Controller';
     if stand
         if strcmp(forceAxis,'y')
-            data_name=['log_ctrl_y_', name_save,'.txt'];
+            data_name=['log_ctrl_y_', name_data,'.txt'];
             save_dir=fullfile(cur,'/data/digit/Biped_Controller/y_force_act_moment');
             
         elseif strcmp(forceAxis,'x')
-            data_name=['log_ctrl_x_', name_save,'.txt'];
+            data_name=['log_ctrl_x_', name_data,'.txt'];
             save_dir=fullfile(cur,'/data/digit/Biped_Controller/x_force_act_moment');
         end
         if compileFDD_Data
@@ -88,7 +89,7 @@ elseif digit
                 fprintf('Saved');
             end
         else
-            load(fullfile(save_dir,[name_save,'.mat']))
+            load(fullfile(save_dir,[name_data,'.mat']))
         end
         
         q_all=logger.q_all;
