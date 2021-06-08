@@ -1,6 +1,10 @@
-##data files
+##data folders
 /FDD_Analysis/data/
+##python environment
 /.venv/
+/.vscode/
+
+##ignore specific files
 /.venv/lib/python3.6/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
 
 
