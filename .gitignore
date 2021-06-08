@@ -1,0 +1,6 @@
+##data files
+/FDD_Analysis/data/
+/.venv/
+/.venv/lib/python3.6/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
+
+
