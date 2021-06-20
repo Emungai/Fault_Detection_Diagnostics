@@ -115,9 +115,9 @@ else:
     lstm_model_all=tf.keras.models.load_model('/home/exo/Documents/eva/Fault_Detection_Diagnostics/Python/model/lstm_model_pos_x_FIXED.h5')
     lstm_model_morebw_nSpaced=tf.keras.models.load_model('/home/exo/Documents/eva/Fault_Detection_Diagnostics/Python/model/lstm_model_pos_x_FIXED_Longer_xfeatures_more.h5')
 
-lstm_model=lstm_model_morebw
+lstm_model=lstm_model_x
 
-num=10
+num=12
 y_predict=lstm_model.predict(LSTM_data[file_names[num]][0])
 y_test=LSTM_data[file_names[num]][1]
 y_diff=y_test-y_predict
