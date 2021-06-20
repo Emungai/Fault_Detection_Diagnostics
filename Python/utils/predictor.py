@@ -1,4 +1,12 @@
 import numpy as np
+import matlab.engine
+# eng.addpath('/home/exo/Documents/eva/Digit_Controller/version/release_2021.02.11/model/FROST/Kinematics_Dynamics_Generation_Eva/gen/kin_2021_04_06/m',nargout=0)
+
+def predictFeatures(q,dq):
+   LG.append(eng.LG_all_f(q))
+   L_lFoot.append(getDigitAngularMomentum(p_LF(:,i),[q;dq]))
+   L_rFoot.append(eng.L_LeftFoot(q))
+   rp_CoMFoot.append(eng.L_LeftFoot(q)) 
 
 def angularMomentumPredictor(logger,L_st_toe_init):
     g=9.81

@@ -20,7 +20,10 @@ load_info.digit=digit_rob;
 load_info.noise=noise
 load_info.saveData=1;
 force_all={'60N','80N','10N','45N','75N','65N','90N'};
-for i=4:length(force_all)
+force_all={'85N','95N'};
+force_all={'20N','30N','35N','40N','55N','105N','110N','115N','120N','125N','130N'};
+force_all={'125N','130N'};
+for i=1:length(force_all)
 if fivelink
     load_info.walk=1;
     load_info.stand=0;

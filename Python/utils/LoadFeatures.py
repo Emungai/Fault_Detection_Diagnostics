@@ -139,6 +139,9 @@ def getDigitFeatures(feat_info):
 
     p_com=np.transpose(p_com)
     p_links=np.transpose(p_links)
+    q_all_f=np.transpose(q_all_f)
+    dq_all_f=np.transpose(dq_all_f)
+    ua_all_f=np.transpose(ua_all_f)
     #endregion 
 
     #*****cutting off the part where AR controller's was running***
@@ -151,18 +154,27 @@ def getDigitFeatures(feat_info):
     feet_info=feet_info[idx_bc[0][-1]:idx_end]
     p_links=p_links[idx_bc[0][-1]:idx_end]
     p_com=p_com[idx_bc[0][-1]:idx_end]
+    q_all_f_bc=q_all_f[idx_bc[0][-1]:idx_end,]
+    dq_all_f_bc=dq_all_f[idx_bc[0][-1]:idx_end,]
+    ua_all_f_bc=ua_all_f[idx_bc[0][-1]:idx_end,]
 
     # endregion
 
 
     # get different sample rate
     if diff_sampleRate:
+        diff_rate=12 #100
+        FDD_bc=FDD_bc[0::diff_rate,:] #to grab everyother column Y[:,0::2]
+        time_data=time_data[0::diff_rate]
+        feet_info=feet_info[0::diff_rate]
+        p_links=p_links[0::diff_rate]
+        p_com=p_com[0::diff_rate]
+        q_all_f_be=q_all_f_bc[0::diff_rate]
+        dq_all_f_be=dq_all_f_bc[0::diff_rate]
+        ua_all_f_be=ua_all_f_bc[0::diff_rate]
+    #save time_data
+    time_data_be=time_data
 
-        FDD_bc=FDD_bc[0::12,:] #to grab everyother column Y[:,0::2]
-        time_data=time_data[0::12]
-        feet_info=feet_info[0::12]
-        p_links=p_links[0::12]
-        p_com=p_com[0::12]
 
 
     #figure out when robot has started to fall and fallen, and create label for classification
@@ -188,13 +200,27 @@ def getDigitFeatures(feat_info):
     if len(r_fallen[0])>0:
         idx_fallen=r_fallen[0][0]
         label[idx_fallen:len(label):,]=2
+        idx_be=r_fallen
+        q_all_f_be=q_all_f_be[0:idx_be[0][0],]
+        dq_all_f_be=dq_all_f_be[0:idx_be[0][0],]
+        ua_all_f_be=ua_all_f_be[0:idx_be[0][0],]
+        time_data_be=time_data_be[0:idx_be[0][0],] 
     #endregion
-
+    
+    #*****cutting off the part after 10 seconds
+    t=np.array(time_data_be)-10
+    idx_be=np.where(t>0)
+    if len(idx_be[0])>0:
+        q_all_f_be=q_all_f_be[0:idx_be[0][0],]
+        dq_all_f_be=dq_all_f_be[0:idx_be[0][0],]
+        ua_all_f_be=ua_all_f_be[0:idx_be[0][0],]
+        time_data_be=time_data_be[0:idx_be[0][0],]  
     data={}
     data['time_data']=time_data
     data['FDD_bc']=FDD_bc
     data['label']=label
-    return data
+    X=np.concatenate((q_all_f_be, dq_all_f_be), axis=1)
+    return data, X, time_data_be, ua_all_f_be
 
 def getDigitState(feat_info):
     logger_dict=getDigitData(feat_info)
@@ -238,17 +264,18 @@ def getDigitState(feat_info):
     # region 
     t=np.array(time_data_bc)-10
     idx_be=np.where(t>0)
-    q_all_f_be=q_all_f_bc[0:idx_be[0][0],]
-    dq_all_f_be=dq_all_f_bc[0:idx_be[0][0],]
-    ua_all_f_be=ua_all_f_bc[0:idx_be[0][0],]
-    time_data_be=time_data_bc[0:idx_be[0][0],]  
+    if len(idx_be[0])>0:
+        q_all_f_bc=q_all_f_bc[0:idx_be[0][0],]
+        dq_all_f_bc=dq_all_f_bc[0:idx_be[0][0],]
+        ua_all_f_bc=ua_all_f_bc[0:idx_be[0][0],]
+        time_data_bc=time_data_bc[0:idx_be[0][0],]  
 
     # get different sample rate
     if diff_sampleRate:
-        time_data_fin=time_data_be[0::12]
-        q_all_f_fin=q_all_f_be[0::12]
-        dq_all_f_fin=dq_all_f_be[0::12]
-        ua_f_fin=ua_all_f_be[0::12]
+        time_data_fin=time_data_bc[0::12]
+        q_all_f_fin=q_all_f_bc[0::12]
+        dq_all_f_fin=dq_all_f_bc[0::12]
+        ua_f_fin=ua_all_f_bc[0::12]
 
     diff_t=np.diff(time_data)
     # q_all_f_fin=q_all_f_fin[0:196,]

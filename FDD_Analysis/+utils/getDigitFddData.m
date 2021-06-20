@@ -10,6 +10,7 @@ idx_djoints= find(cellfun(@(v) any(strcmp(v,'q_{all}')),{logged_data.Name}));
 idx_motorsCurrent = find(cellfun(@(v) any(strcmp(v,'u_{torque_{current}}')),{logged_data.Name}));
 idx_motorsDesired = find(cellfun(@(v) any(strcmp(v,'u_{torque_{command}}')),{logged_data.Name}));
 
+
 q_all=logged_data(idx_joints).Data;
 dq_all=logged_data(idx_djoints).Data;
 ua_all=logged_data(idx_motorsCurrent).Data;

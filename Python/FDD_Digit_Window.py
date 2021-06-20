@@ -3,7 +3,6 @@ import numpy as np
 import sys
 import math
 
-
 import matplotlib.pyplot as plt
 #importing things for color map see https://matplotlib.org/stable/tutorials/colors/colormap-manipulation.html
 from matplotlib import cm
@@ -104,6 +103,8 @@ label= data['label']
 t_window=1 #how much time in a window
 t_endFirst=time_data[0]+t_window
 t_intv=np.where((time_data-t_endFirst)<0)[0][-1]
+window_len=100
+t_intv=window_len
 # t_intv=len(FDD_bc)-1
 
 # i=0

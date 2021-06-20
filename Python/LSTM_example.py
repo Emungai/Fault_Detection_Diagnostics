@@ -304,7 +304,7 @@ for example_inputs, example_labels in wide_window.train.take(1):
   print(f'Labels shape (batch, time, features): {example_labels.shape}')
 
 
-MAX_EPOCHS = 20
+MAX_EPOCHS = 1
 
 def compile_and_fit(model, window, patience=2):
   early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
@@ -337,5 +337,5 @@ val_performance = {}
 performance = {}
 val_performance['LSTM'] = lstm_model.evaluate( wide_window.val)
 performance['LSTM'] = lstm_model.evaluate( wide_window.test, verbose=0)
-
+wide_window.plot(lstm_model)
 print()
